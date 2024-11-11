@@ -1,0 +1,44 @@
+name: caige-dev
+
+services:
+  # frontend:
+  #   image: anuchitorigin/caige-frontend:latest
+  #   restart: always
+  #   ports:
+  #     - ${FR_MAIN_PORT}:${FR_MAIN_PORT}
+  #   depends_on:
+  #     - ba_main
+  #     - ba_auth
+  # ba_main:
+  #   image: anuchitorigin/caige-ba_main:latest
+  #   command: npm start
+  #   restart: always
+  #   ports:
+  #     - ${BA_MAIN_PORT}:${BA_MAIN_PORT}
+  #   depends_on:
+  #     - db
+  ba_auth:
+    image: anuchitorigin/caige-ba_auth:latest
+    command: npm start
+    restart: always
+    ports:
+      - ${BA_AUTH_PORT}:${BA_AUTH_PORT}
+    depends_on:
+      - db
+  ba_data:
+    image: anuchitorigin/caige-ba_data:latest
+    command: npm start
+    restart: always
+    ports:
+      - ${BA_DATA_PORT}:${BA_DATA_PORT}
+    depends_on:
+      - db
+  db:
+    image: anuchitorigin/caige-db:latest
+    restart: always
+    ports:
+      - 3306:3306
+    command: --max_allowed_packet=256M
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MYSQL_TCP_PORT: 3306

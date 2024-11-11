@@ -1,3 +1,11 @@
+# Custom
+**/.DS_Store
+**/Thumbs.db
+**/$RECYCLE.BIN/
+**/UserInterfaceState.xcuserstate
+**/*~
+**/*.pem
+
 # Logs
 logs
 *.log

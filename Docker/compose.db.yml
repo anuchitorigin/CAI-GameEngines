@@ -1,0 +1,10 @@
+name: caige-db
+
+services:
+  db_new:
+    image: mariadb:11.5
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
