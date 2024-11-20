@@ -166,7 +166,7 @@ router.post('/quiz', async (req: Request, res: Response) => {
   mediaid = xString(mediaid);
   let rowno = 0;
   for (const choice of choices) {
-    rowno += 1;
+    rowno++;
     if (!(isData(choice.answer) && isData(choice.becorrect))) {
       sendObj(3, 'Insufficient required fields', [{
         RowNo: rowno,
@@ -183,7 +183,7 @@ router.post('/quiz', async (req: Request, res: Response) => {
   // -- table: choices
   rowno = 0;
   for (const choice of choices) {
-    rowno += 1;
+    rowno++;
     const answer = xString(choice.answer);
     const choiceno = xNumber(choice.choiceno);
     const choicescore = xNumber(choice.choicescore);
@@ -609,7 +609,7 @@ router.put('/quiz/id/:id', async (req: Request, res: Response) => {
   mediaid = xString(mediaid);
   let rowno = 0;
   for (const choice of choices) {
-    rowno += 1;
+    rowno++;
     if (!(isData(choice.answer) && isData(choice.becorrect))) {
       sendObj(3, 'Insufficient required fields', [{
         RowNo: rowno,
@@ -631,7 +631,7 @@ router.put('/quiz/id/:id', async (req: Request, res: Response) => {
   }
   rowno = 0;
   for (const choice of choices) {
-    rowno += 1;
+    rowno++;
     const answer = xString(choice.answer);
     const choiceno = xNumber(choice.choiceno);
     const choicescore = xNumber(choice.choicescore);
