@@ -13,39 +13,25 @@ const K_log_incident = {
   // -- Bucket
   BUCKET_ADD: 'bucket:add',
   BUCKET_DEL: 'bucket:delete',
-  // -- Shelf
-  SHELF_ADD: 'shelf:add',
-  SHELF_EDIT: 'shelf:edit',
-  SHELF_DEL: 'shelf:delete',
-  // -- GoodService
-  GOODSERVICE_ADD: 'goodservice:add',
-  GOODSERVICE_IMPORT: 'goodservice:import',
-  GOODSERVICE_EDIT: 'goodservice:edit',
-  GOODSERVICE_DEL: 'goodservice:delete',
-  // -- Station
-  STATION_ADD: 'station:add',
-  STATION_EDIT: 'station:edit',
-  STATION_DEL: 'station:delete',
-  // -- Vendor
-  VENDOR_ADD: 'vendor:add',
-  VENDOR_IMPORT: 'vendor:import',
-  VENDOR_EDIT: 'vendor:edit',
-  VENDOR_DEL: 'vendor:delete',
-  // -- BOM
-  BOM_ADD: 'bom:add',
-  BOM_EDIT: 'bom:edit',
-  BOM_DEL: 'bom:delete',
   // -- Content
   CONTENT_ADD: 'content:add',
   CONTENT_DEL: 'content:delete',
-  // -- Recipe
-  RECIPE_ADD: 'recipe:add',
-  RECIPE_EDIT: 'recipe:edit',
-  RECIPE_DEL: 'recipe:delete',
-  // -- Recipe Item
-  RECIPEITEM_ADD: 'recipeitem:add',
-  RECIPEITEM_EDIT: 'recipeitem:edit',
-  RECIPEITEM_DEL: 'recipeitem:delete',
+  // -- Module
+  MODULE_ADD: 'module:add',
+  MODULE_EDIT: 'module:edit',
+  MODULE_DEL: 'module:delete',
+  // -- Lesson
+  LESSON_ADD: 'lesson:add',
+  LESSON_EDIT: 'lesson:edit',
+  LESSON_DEL: 'lesson:delete',
+  // -- Exam
+  EXAM_ADD: 'exam:add',
+  EXAM_EDIT: 'exam:edit',
+  EXAM_DEL: 'exam:delete',
+  // -- Quiz
+  QUIZ_ADD: 'quiz:add',
+  QUIZ_EDIT: 'quiz:edit',
+  QUIZ_DEL: 'quiz:delete',
 }
 
 export {

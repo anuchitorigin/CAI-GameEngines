@@ -73,7 +73,7 @@ CREATE TABLE `log_sessions` (
   `callername` varchar(60) NOT NULL,
   `purpose` varchar(20) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -82,6 +82,8 @@ CREATE TABLE `log_sessions` (
 
 LOCK TABLES `log_sessions` WRITE;
 /*!40000 ALTER TABLE `log_sessions` DISABLE KEYS */;
+INSERT INTO `log_sessions` VALUES
+(1,'2024-11-11 08:18:22',NULL,'20a0a0c4-eafd-4919-8c0b-7ea0eb3786f0',1,'4301d35b5e7f07b6','2024-11-12 08:18:22','5.5.5.5','Chit','login');
 /*!40000 ALTER TABLE `log_sessions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -101,7 +103,7 @@ CREATE TABLE `roles` (
   `roleparam` varchar(1000) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `roleid` (`roleid`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -111,9 +113,10 @@ CREATE TABLE `roles` (
 LOCK TABLES `roles` WRITE;
 /*!40000 ALTER TABLE `roles` DISABLE KEYS */;
 INSERT INTO `roles` VALUES
-(1,'2024-11-11 08:04:36',NULL,'AUTH_SUPER','Super Admin','{\"dashboard\":1,\"about\":1,\"lesson\":1,\"exam\":1,\"score\":1,\"system\":1,\"sys-var\":1,\"log-sys\":1,\"log-user\":1,\"sys-user\":1,\"__role-super\":1}'),
-(2,'2024-11-11 08:04:36',NULL,'AUTH_ADMIN','Administrator','{\"dashboard\":1,\"about\":1,\"lesson\":1,\"exam\":1,\"score\":1,\"system\":1,\"sys-var\":1,\"log-sys\":1,\"log-user\":1,\"sys-user\":1,\"__role-super\":0}'),
-(3,'2024-11-11 08:04:36',NULL,'AUTH_OPER','Student','{\"dashboard\":1,\"about\":1,\"lesson\":1,\"exam\":1,\"score\":1,\"system\":0,\"sys-var\":0,\"log-sys\":0,\"log-user\":0,\"sys-user\":0,\"__role-super\":0}');
+(1,'2024-11-20 07:19:40',NULL,'AUTH_SUPER','Super Admin','{\"dashboard\":1,\"about\":1,\"lesson\":1,\"exam\":1,\"score\":1,\"data\":1,\"dat-module\":1,\"dat-exam\":1,\"system\":1,\"sys-var\":1,\"log-sys\":1,\"log-user\":1,\"sys-user\":1,\"__role-super\":1}'),
+(2,'2024-11-20 07:19:40',NULL,'AUTH_ADMIN','Administrator','{\"dashboard\":1,\"about\":1,\"lesson\":1,\"exam\":1,\"score\":1,\"data\":1,\"dat-module\":1,\"dat-exam\":1,\"system\":1,\"sys-var\":1,\"log-sys\":1,\"log-user\":1,\"sys-user\":1,\"__role-super\":0}'),
+(3,'2024-11-20 07:19:40',NULL,'AUTH_EXPERT','Expert','{\"dashboard\":1,\"about\":1,\"lesson\":1,\"exam\":1,\"score\":1,\"data\":1,\"dat-module\":1,\"dat-exam\":1,\"system\":0,\"sys-var\":0,\"log-sys\":0,\"log-user\":0,\"sys-user\":0,\"__role-super\":0}'),
+(4,'2024-11-20 07:19:40',NULL,'AUTH_STUDENT','Student','{\"dashboard\":1,\"about\":1,\"lesson\":1,\"exam\":1,\"score\":1,\"data\":0,\"dat-module\":0,\"dat-exam\":0,\"system\":0,\"sys-var\":0,\"log-sys\":0,\"log-user\":0,\"sys-user\":0,\"__role-super\":0}');
 /*!40000 ALTER TABLE `roles` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -141,7 +144,7 @@ CREATE TABLE `users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `userid` (`userid`),
   UNIQUE KEY `loginid` (`loginid`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -151,9 +154,12 @@ CREATE TABLE `users` (
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
 INSERT INTO `users` VALUES
-(1,'2024-11-11 08:04:59',NULL,0,0,'19800323-74e3-41de-a9f1-660928977797','anuchitb','03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4','{\"dashboard\":1,\"about\":1,\"lesson\":1,\"exam\":1,\"score\":1,\"system\":1,\"sys-var\":1,\"log-sys\":1,\"log-user\":1,\"sys-user\":1,\"__role-super\":1}','Anuchit','B',NULL,NULL),
-(2,'2024-11-11 08:04:59',NULL,0,0,'19830803-579c-4ef5-8a93-660890391258','chaiyawutk','f8638b979b2f4f793ddb6dbd197e0ee25a7a6ea32b0ae22f5e3c5d119d839e75','{\"dashboard\":1,\"about\":1,\"lesson\":1,\"exam\":1,\"score\":1,\"system\":1,\"sys-var\":1,\"log-sys\":1,\"log-user\":1,\"sys-user\":1,\"__role-super\":1}','Chaiyawut','K',NULL,NULL),
-(3,'2024-11-11 08:04:59',NULL,0,0,'20240101-3064-422b-a1cc-660818789236','administrator','9af15b336e6a9619928537df30b2e6a2376569fcf9d7e773eccede65606529a0','{\"dashboard\":1,\"about\":1,\"lesson\":1,\"exam\":1,\"score\":1,\"system\":1,\"sys-var\":1,\"log-sys\":1,\"log-user\":1,\"sys-user\":1,\"__role-super\":0}','Administrator','',NULL,NULL);
+(1,'2024-11-20 07:20:00',NULL,0,0,'19800323-74e3-41de-a9f1-660928977797','anuchitb','03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4','{\"dashboard\":1,\"about\":1,\"lesson\":1,\"exam\":1,\"score\":1,\"data\":1,\"dat-module\":1,\"dat-exam\":1,\"system\":1,\"sys-var\":1,\"log-sys\":1,\"log-user\":1,\"sys-user\":1,\"__role-super\":1}','Anuchit','B',NULL,NULL),
+(2,'2024-11-20 07:20:00',NULL,0,0,'19830803-579c-4ef5-8a93-660890391258','chaiyawutk','f8638b979b2f4f793ddb6dbd197e0ee25a7a6ea32b0ae22f5e3c5d119d839e75','{\"dashboard\":1,\"about\":1,\"lesson\":1,\"exam\":1,\"score\":1,\"data\":1,\"dat-module\":1,\"dat-exam\":1,\"system\":1,\"sys-var\":1,\"log-sys\":1,\"log-user\":1,\"sys-user\":1,\"__role-super\":1}','Chaiyawut','K',NULL,NULL),
+(3,'2024-11-20 07:20:00',NULL,0,0,'20240101-3064-422b-a1cc-660818789236','administrator','9af15b336e6a9619928537df30b2e6a2376569fcf9d7e773eccede65606529a0','{\"dashboard\":1,\"about\":1,\"lesson\":1,\"exam\":1,\"score\":1,\"data\":1,\"dat-module\":1,\"dat-exam\":1,\"system\":1,\"sys-var\":1,\"log-sys\":1,\"log-user\":1,\"sys-user\":1,\"__role-super\":0}','Administrator','',NULL,NULL),
+(4,'2024-11-20 07:20:00',NULL,0,0,'62f9480e-66cc-4f0e-bbe7-41461f554fa6','expert1','22fa5b8fd33e146c149fbbb0a71539926f2f8c9bdad93a3fdc8ffa42f0baa15b','{\"dashboard\":1,\"about\":1,\"lesson\":1,\"exam\":1,\"score\":1,\"data\":1,\"dat-module\":1,\"dat-exam\":1,\"system\":0,\"sys-var\":0,\"log-sys\":0,\"log-user\":0,\"sys-user\":0,\"__role-super\":0}','Expert','1',NULL,NULL),
+(5,'2024-11-20 07:20:00',NULL,0,0,'dde89c4d-fac5-457c-8e9e-47b36155b236','expert2','018d09486d3056e2cf124b69c0c1096012488e5068ecdddbb31987e72eea6075','{\"dashboard\":1,\"about\":1,\"lesson\":1,\"exam\":1,\"score\":1,\"data\":1,\"dat-module\":1,\"dat-exam\":1,\"system\":0,\"sys-var\":0,\"log-sys\":0,\"log-user\":0,\"sys-user\":0,\"__role-super\":0}','Expert','2',NULL,NULL),
+(6,'2024-11-20 07:20:00',NULL,0,0,'36557ff3-f396-4bea-96fe-cc1f855beda7','expert3','7c08dad5eed5f967f52b1efdb82222cc32d689de66757e6d9a66866e40b4b69e','{\"dashboard\":1,\"about\":1,\"lesson\":1,\"exam\":1,\"score\":1,\"data\":1,\"dat-module\":1,\"dat-exam\":1,\"system\":0,\"sys-var\":0,\"log-sys\":0,\"log-user\":0,\"sys-user\":0,\"__role-super\":0}','Expert','3',NULL,NULL);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -199,6 +205,37 @@ LOCK TABLES `buckets` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `choices`
+--
+
+DROP TABLE IF EXISTS `choices`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `choices` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT NULL ON UPDATE current_timestamp(),
+  `quiz_id` int(11) NOT NULL,
+  `answer` varchar(250) DEFAULT NULL,
+  `choiceno` int(11) NOT NULL,
+  `choicescore` int(11) NOT NULL,
+  `becorrect` tinyint(1) NOT NULL DEFAULT 0,
+  `mediaid` varchar(40) DEFAULT NULL,
+  `feedbackid` varchar(40) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `choices`
+--
+
+LOCK TABLES `choices` WRITE;
+/*!40000 ALTER TABLE `choices` DISABLE KEYS */;
+/*!40000 ALTER TABLE `choices` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `contents`
 --
 
@@ -225,6 +262,157 @@ CREATE TABLE `contents` (
 LOCK TABLES `contents` WRITE;
 /*!40000 ALTER TABLE `contents` DISABLE KEYS */;
 /*!40000 ALTER TABLE `contents` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `exams`
+--
+
+DROP TABLE IF EXISTS `exams`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `exams` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT NULL ON UPDATE current_timestamp(),
+  `belocked` tinyint(1) NOT NULL DEFAULT 0,
+  `becancelled` tinyint(1) NOT NULL DEFAULT 0,
+  `docstatus` int(11) NOT NULL DEFAULT 0,
+  `examid` varchar(40) NOT NULL,
+  `examcode` varchar(40) NOT NULL,
+  `module_id` int(11) NOT NULL,
+  `lesson_id` int(11) NOT NULL,
+  `maxscore` int(11) NOT NULL,
+  `examminute` int(11) NOT NULL,
+  `title` varchar(120) NOT NULL,
+  `caption` varchar(250) DEFAULT NULL,
+  `descr` varchar(1000) DEFAULT NULL,
+  `coverid` varchar(40) DEFAULT NULL,
+  `maturityrating` int(11) NOT NULL DEFAULT 0,
+  `tags` varchar(1000) DEFAULT NULL,
+  `released_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `examid` (`examid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `exams`
+--
+
+LOCK TABLES `exams` WRITE;
+/*!40000 ALTER TABLE `exams` DISABLE KEYS */;
+/*!40000 ALTER TABLE `exams` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `lessons`
+--
+
+DROP TABLE IF EXISTS `lessons`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `lessons` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT NULL ON UPDATE current_timestamp(),
+  `belocked` tinyint(1) NOT NULL DEFAULT 0,
+  `becancelled` tinyint(1) NOT NULL DEFAULT 0,
+  `docstatus` int(11) NOT NULL DEFAULT 0,
+  `lessonid` varchar(40) NOT NULL,
+  `lessoncode` varchar(40) NOT NULL,
+  `module_id` int(11) NOT NULL,
+  `lessonno` int(11) NOT NULL,
+  `title` varchar(120) NOT NULL,
+  `descr` varchar(1000) DEFAULT NULL,
+  `coverid` varchar(40) DEFAULT NULL,
+  `contentid` varchar(40) DEFAULT NULL,
+  `mediaid` varchar(40) DEFAULT NULL,
+  `tags` varchar(1000) DEFAULT NULL,
+  `released_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `lessonid` (`lessonid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `lessons`
+--
+
+LOCK TABLES `lessons` WRITE;
+/*!40000 ALTER TABLE `lessons` DISABLE KEYS */;
+/*!40000 ALTER TABLE `lessons` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `modules`
+--
+
+DROP TABLE IF EXISTS `modules`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `modules` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT NULL ON UPDATE current_timestamp(),
+  `belocked` tinyint(1) NOT NULL DEFAULT 0,
+  `becancelled` tinyint(1) NOT NULL DEFAULT 0,
+  `docstatus` int(11) NOT NULL DEFAULT 0,
+  `moduleid` varchar(40) NOT NULL,
+  `modulecode` varchar(40) NOT NULL,
+  `title` varchar(120) NOT NULL,
+  `caption` varchar(250) DEFAULT NULL,
+  `descr` varchar(1000) DEFAULT NULL,
+  `coverid` varchar(40) DEFAULT NULL,
+  `maturityrating` int(11) NOT NULL DEFAULT 0,
+  `tags` varchar(1000) DEFAULT NULL,
+  `released_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `moduleid` (`moduleid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `modules`
+--
+
+LOCK TABLES `modules` WRITE;
+/*!40000 ALTER TABLE `modules` DISABLE KEYS */;
+/*!40000 ALTER TABLE `modules` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `quizzes`
+--
+
+DROP TABLE IF EXISTS `quizzes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `quizzes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT NULL ON UPDATE current_timestamp(),
+  `belocked` tinyint(1) NOT NULL DEFAULT 0,
+  `becancelled` tinyint(1) NOT NULL DEFAULT 0,
+  `docstatus` int(11) NOT NULL DEFAULT 0,
+  `exam_id` int(11) NOT NULL,
+  `quizno` int(11) NOT NULL,
+  `quizminute` int(11) NOT NULL,
+  `question` varchar(1000) DEFAULT NULL,
+  `contentid` varchar(40) DEFAULT NULL,
+  `mediaid` varchar(40) DEFAULT NULL,
+  `released_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `quizzes`
+--
+
+LOCK TABLES `quizzes` WRITE;
+/*!40000 ALTER TABLE `quizzes` DISABLE KEYS */;
+/*!40000 ALTER TABLE `quizzes` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -286,7 +474,7 @@ CREATE TABLE `log_syss` (
   `incident` varchar(120) NOT NULL,
   `logdetail` varchar(500) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -295,6 +483,8 @@ CREATE TABLE `log_syss` (
 
 LOCK TABLES `log_syss` WRITE;
 /*!40000 ALTER TABLE `log_syss` DISABLE KEYS */;
+INSERT INTO `log_syss` VALUES
+(1,'2024-11-11 08:29:22',NULL,'ba_auth','auth:signup','{\"loginid\":\"iamnew\",\"userid\":\"8817646c-17d9-4779-824a-926aab8bb914\"}');
 /*!40000 ALTER TABLE `log_syss` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -313,7 +503,7 @@ CREATE TABLE `log_users` (
   `incident` varchar(120) NOT NULL,
   `logdetail` varchar(500) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -322,11 +512,54 @@ CREATE TABLE `log_users` (
 
 LOCK TABLES `log_users` WRITE;
 /*!40000 ALTER TABLE `log_users` DISABLE KEYS */;
+INSERT INTO `log_users` VALUES
+(1,'2024-11-11 08:18:22',NULL,'19800323-74e3-41de-a9f1-660928977797','auth:login','{}');
 /*!40000 ALTER TABLE `log_users` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
 -- Dumping routines for database 'caige_log'
+--
+
+--
+-- Current Database: `caige_oper`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `caige_oper` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci */;
+
+USE `caige_oper`;
+
+--
+-- Table structure for table `takenexams`
+--
+
+DROP TABLE IF EXISTS `takenexams`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `takenexams` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT NULL ON UPDATE current_timestamp(),
+  `finished_at` datetime DEFAULT NULL,
+  `userid` varchar(40) NOT NULL,
+  `examid` varchar(40) NOT NULL,
+  `finishscore` int(11) NOT NULL,
+  `finishminute` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `takenexams`
+--
+
+LOCK TABLES `takenexams` WRITE;
+/*!40000 ALTER TABLE `takenexams` DISABLE KEYS */;
+/*!40000 ALTER TABLE `takenexams` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Dumping routines for database 'caige_oper'
 --
 
 --
@@ -2028,8 +2261,8 @@ CREATE TABLE `proc` (
 LOCK TABLES `proc` WRITE;
 /*!40000 ALTER TABLE `proc` DISABLE KEYS */;
 INSERT INTO `proc` VALUES
-('mysql','AddGeometryColumn','PROCEDURE','AddGeometryColumn','SQL','CONTAINS_SQL','NO','INVOKER','catalog varchar(64), t_schema varchar(64),\n   t_name varchar(64), geometry_column varchar(64), t_srid int','','begin\n  set @qwe= concat(\'ALTER TABLE \', t_schema, \'.\', t_name, \' ADD \', geometry_column,\' GEOMETRY REF_SYSTEM_ID=\', t_srid); PREPARE ls from @qwe; execute ls; deallocate prepare ls; end','mariadb.sys@localhost','2024-11-11 07:47:17','2024-11-11 07:47:17','','','utf8mb3','utf8mb3_general_ci','utf8mb4_uca1400_ai_ci','begin\n  set @qwe= concat(\'ALTER TABLE \', t_schema, \'.\', t_name, \' ADD \', geometry_column,\' GEOMETRY REF_SYSTEM_ID=\', t_srid); PREPARE ls from @qwe; execute ls; deallocate prepare ls; end','NONE'),
-('mysql','DropGeometryColumn','PROCEDURE','DropGeometryColumn','SQL','CONTAINS_SQL','NO','INVOKER','catalog varchar(64), t_schema varchar(64),\n   t_name varchar(64), geometry_column varchar(64)','','begin\n  set @qwe= concat(\'ALTER TABLE \', t_schema, \'.\', t_name, \' DROP \', geometry_column); PREPARE ls from @qwe; execute ls; deallocate prepare ls; end','mariadb.sys@localhost','2024-11-11 07:47:17','2024-11-11 07:47:17','','','utf8mb3','utf8mb3_general_ci','utf8mb4_uca1400_ai_ci','begin\n  set @qwe= concat(\'ALTER TABLE \', t_schema, \'.\', t_name, \' DROP \', geometry_column); PREPARE ls from @qwe; execute ls; deallocate prepare ls; end','NONE'),
+('mysql','AddGeometryColumn','PROCEDURE','AddGeometryColumn','SQL','CONTAINS_SQL','NO','INVOKER','catalog varchar(64), t_schema varchar(64),\n   t_name varchar(64), geometry_column varchar(64), t_srid int','','begin\n  set @qwe= concat(\'ALTER TABLE \', t_schema, \'.\', t_name, \' ADD \', geometry_column,\' GEOMETRY REF_SYSTEM_ID=\', t_srid); PREPARE ls from @qwe; execute ls; deallocate prepare ls; end','mariadb.sys@localhost','2024-11-20 11:41:26','2024-11-20 11:41:26','','','utf8mb3','utf8mb3_general_ci','utf8mb4_uca1400_ai_ci','begin\n  set @qwe= concat(\'ALTER TABLE \', t_schema, \'.\', t_name, \' ADD \', geometry_column,\' GEOMETRY REF_SYSTEM_ID=\', t_srid); PREPARE ls from @qwe; execute ls; deallocate prepare ls; end','NONE'),
+('mysql','DropGeometryColumn','PROCEDURE','DropGeometryColumn','SQL','CONTAINS_SQL','NO','INVOKER','catalog varchar(64), t_schema varchar(64),\n   t_name varchar(64), geometry_column varchar(64)','','begin\n  set @qwe= concat(\'ALTER TABLE \', t_schema, \'.\', t_name, \' DROP \', geometry_column); PREPARE ls from @qwe; execute ls; deallocate prepare ls; end','mariadb.sys@localhost','2024-11-20 11:41:26','2024-11-20 11:41:26','','','utf8mb3','utf8mb3_general_ci','utf8mb4_uca1400_ai_ci','begin\n  set @qwe= concat(\'ALTER TABLE \', t_schema, \'.\', t_name, \' DROP \', geometry_column); PREPARE ls from @qwe; execute ls; deallocate prepare ls; end','NONE'),
 ('sys','extract_schema_from_file_name','FUNCTION','extract_schema_from_file_name','SQL','NO_SQL','YES','INVOKER','path VARCHAR(512)\n    ','varchar(64) CHARSET utf8mb3 COLLATE utf8mb3_general_ci','BEGIN\n    RETURN LEFT(SUBSTRING_INDEX(SUBSTRING_INDEX(REPLACE(path, \'\\\\\', \'/\'), \'/\', -2), \'/\', 1), 64);\nEND','mariadb.sys@localhost','2024-11-11 05:18:41','2024-11-11 05:18:41','','\n             Description\n             Takes a raw file path, and attempts to extract the schema name from it.\n             Useful for when interacting with Performance Schema data\n             concerning IO statistics, for example.\n             Currently relies on the fact that a table data file will be within a\n             specified database directory (will not work with partitions or tables\n             that specify an individual DATA_DIRECTORY).\n             Parameters\n             path (VARCHAR(512)):\n               The full file path to a data file to extract the schema name from.\n             Returns\n             VARCHAR(64)\n             Example\n             mysql> SELECT sys.extract_schema_from_file_name(\'/var/lib/mysql/employees/employee.ibd\');\n             +----------------------------------------------------------------------------+\n             | sys.extract_schema_from_file_name(\'/var/lib/mysql/employees/employee.ibd\') |\n             +----------------------------------------------------------------------------+\n             | employees                                                                  |\n             +----------------------------------------------------------------------------+\n             1 row in set (0.00 sec)\n            ','utf8mb3','utf8mb3_general_ci','utf8mb3_general_ci','BEGIN\n    RETURN LEFT(SUBSTRING_INDEX(SUBSTRING_INDEX(REPLACE(path, \'\\\', \'/\'), \'/\', -2), \'/\', 1), 64);\nEND','NONE'),
 ('sys','extract_table_from_file_name','FUNCTION','extract_table_from_file_name','SQL','NO_SQL','YES','INVOKER','path VARCHAR(512)\n    ','varchar(64) CHARSET utf8mb3 COLLATE utf8mb3_general_ci','BEGIN\n    RETURN LEFT(SUBSTRING_INDEX(REPLACE(SUBSTRING_INDEX(REPLACE(path, \'\\\\\', \'/\'), \'/\', -1), \'@0024\', \'$\'), \'.\', 1), 64);\nEND','mariadb.sys@localhost','2024-11-11 05:18:41','2024-11-11 05:18:41','','\n             Description\n             Takes a raw file path, and extracts the table name from it.\n             Useful for when interacting with Performance Schema data\n             concerning IO statistics, for example.\n             Parameters\n             path (VARCHAR(512)):\n               The full file path to a data file to extract the table name from.\n             Returns\n             VARCHAR(64)\n             Example\n             mysql> SELECT sys.extract_table_from_file_name(\'/var/lib/mysql/employees/employee.ibd\');\n             +---------------------------------------------------------------------------+\n             | sys.extract_table_from_file_name(\'/var/lib/mysql/employees/employee.ibd\') |\n             +---------------------------------------------------------------------------+\n             | employee                                                                  |\n             +---------------------------------------------------------------------------+\n             1 row in set (0.02 sec)\n            ','utf8mb3','utf8mb3_general_ci','utf8mb3_general_ci','BEGIN\n    RETURN LEFT(SUBSTRING_INDEX(REPLACE(SUBSTRING_INDEX(REPLACE(path, \'\\\', \'/\'), \'/\', -1), \'@0024\', \'$\'), \'.\', 1), 64);\nEND','NONE'),
 ('sys','format_bytes','FUNCTION','format_bytes','SQL','NO_SQL','YES','INVOKER','bytes TEXT\n    ','text CHARSET utf8mb3 COLLATE utf8mb3_general_ci','BEGIN\n  IF bytes IS NULL THEN RETURN NULL;\n  ELSEIF bytes >= 1125899906842624 THEN RETURN CONCAT(ROUND(bytes / 1125899906842624, 2), \' PiB\');\n  ELSEIF bytes >= 1099511627776 THEN RETURN CONCAT(ROUND(bytes / 1099511627776, 2), \' TiB\');\n  ELSEIF bytes >= 1073741824 THEN RETURN CONCAT(ROUND(bytes / 1073741824, 2), \' GiB\');\n  ELSEIF bytes >= 1048576 THEN RETURN CONCAT(ROUND(bytes / 1048576, 2), \' MiB\');\n  ELSEIF bytes >= 1024 THEN RETURN CONCAT(ROUND(bytes / 1024, 2), \' KiB\');\n  ELSE RETURN CONCAT(ROUND(bytes, 0), \' bytes\');\n  END IF;\nEND','mariadb.sys@localhost','2024-11-11 05:18:41','2024-11-11 05:18:41','','\n             Description\n             Takes a raw bytes value, and converts it to a human readable format.\n             Parameters\n             bytes (TEXT):\n               A raw bytes value.\n             Returns\n             TEXT\n             Example\n             mysql> SELECT sys.format_bytes(2348723492723746) AS size;\n             +----------+\n             | size     |\n             +----------+\n             | 2.09 PiB |\n             +----------+\n             1 row in set (0.00 sec)\n             mysql> SELECT sys.format_bytes(2348723492723) AS size;\n             +----------+\n             | size     |\n             +----------+\n             | 2.14 TiB |\n             +----------+\n             1 row in set (0.00 sec)\n             mysql> SELECT sys.format_bytes(23487234) AS size;\n             +-----------+\n             | size      |\n             +-----------+\n             | 22.40 MiB |\n             +-----------+\n             1 row in set (0.00 sec)\n            ','utf8mb3','utf8mb3_general_ci','utf8mb3_general_ci','BEGIN\n  IF bytes IS NULL THEN RETURN NULL;\n  ELSEIF bytes >= 1125899906842624 THEN RETURN CONCAT(ROUND(bytes / 1125899906842624, 2), \' PiB\');\n  ELSEIF bytes >= 1099511627776 THEN RETURN CONCAT(ROUND(bytes / 1099511627776, 2), \' TiB\');\n  ELSEIF bytes >= 1073741824 THEN RETURN CONCAT(ROUND(bytes / 1073741824, 2), \' GiB\');\n  ELSEIF bytes >= 1048576 THEN RETURN CONCAT(ROUND(bytes / 1048576, 2), \' MiB\');\n  ELSEIF bytes >= 1024 THEN RETURN CONCAT(ROUND(bytes / 1024, 2), \' KiB\');\n  ELSE RETURN CONCAT(ROUND(bytes, 0), \' bytes\');\n  END IF;\nEND','NONE'),
@@ -37541,6 +37774,12 @@ USE `caige_data`;
 USE `caige_log`;
 
 --
+-- Current Database: `caige_oper`
+--
+
+USE `caige_oper`;
+
+--
 -- Current Database: `mysql`
 --
 
@@ -37573,4 +37812,4 @@ USE `mysql`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2024-11-11  8:05:29
+-- Dump completed on 2024-11-20 11:42:30

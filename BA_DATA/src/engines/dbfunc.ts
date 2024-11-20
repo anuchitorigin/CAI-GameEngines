@@ -1,301 +1,212 @@
 //################################# INCLUDE #################################
 //---- System Modules ----
-// import crypto from 'crypto';
+import crypto from 'crypto';
 
 //---- Application Modules ----
 import K from './constant';
 import dbconnect from './db_data';
-import { xString, xNumber, isData, incident } from './originutil';
+import { xString, xNumber, toArray, isData, incident } from './originutil';
 
 //################################# DECLARATION #################################
 const THIS_FILENAME = 'dbfunc.ts';
 
 //################################# FUNCTION #################################
-async function add_shelf(
-  shelfid: string, 
-  shelfname: string,
+async function add_module(
+  modulecode: string,
+  title: string,
+  caption: string,
   descr: string,
-  store_id: number
+  coverid: string,
+  maturityrating: number,
+  tags: string
 ) {
+  const moduleid = crypto.randomUUID();
   let id = 0;
   try {
     const sql = `
-      INSERT INTO shelfs
-        (shelfid, shelfname, descr, store_id)
+      INSERT INTO modules
+        (moduleid, modulecode, title, caption, descr, coverid, maturityrating, tags)
         VALUES
-        (?,?,?,?)
+        (?,?,?,?,?,?,?,?)
         RETURNING id;
     `;
     const result = await dbconnect.execute(sql, [
-      shelfid, 
-      shelfname, 
+      moduleid, 
+      modulecode, 
+      title, 
+      caption, 
       descr, 
-      store_id
+      coverid, 
+      maturityrating, 
+      tags
     ]); 
     if (result.length > 0) {
       id = xNumber(result[0].id);
     }
   } catch (err) {
-    console.log(incident(THIS_FILENAME+':add_shelf', String(err)));
+    console.log(incident(THIS_FILENAME+':add_module', String(err)));
     return K.SYS_INTERNAL_PROCESS_ERROR;
   }
   return id;
 }
 
-async function add_goodservice(
-  goodsid: string, 
-  goodsname: string,
-  descr: string, 
-  goodstype_id: number,
-  unitcost: number,
-  minstockqty: number,
-  maxstockqty: number,
-  pictureid: string,
-  remark: string
+async function add_lesson(
+  lessoncode: string,
+  module_id: number,
+  lessonno: number,
+  title: string,
+  descr: string,
+  coverid: string,
+  contentid: string,
+  mediaid: string,
+  tags: string
 ) {
+  const lessonid = crypto.randomUUID();
   let id = 0;
   try {
     const sql = `
-      INSERT INTO goodservices
-        (goodsid, goodsname, descr, goodstype_id, unitcost, minstockqty, maxstockqty, pictureid, remark)
-        VALUES
-        (?,?,?,?,?,?,?,?,?)
-        RETURNING id;
-    `;
-    const result = await dbconnect.execute(sql, [
-      goodsid,
-      goodsname,
-      descr,
-      goodstype_id,
-      unitcost,
-      minstockqty,
-      maxstockqty,
-      pictureid,
-      remark
-    ]); 
-    if (result.length > 0) {
-      id = xNumber(result[0].id);
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':add_goodservice', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return id;
-}
-
-async function add_station(
-  stationid: string, 
-  stationname: string,
-  descr: string
-) {
-  let id = 0;
-  try {
-    const sql = `
-      INSERT INTO stations
-        (stationid, stationname, descr)
-        VALUES
-        (?,?,?)
-        RETURNING id;
-    `;
-    const result = await dbconnect.execute(sql, [
-      stationid,
-      stationname,
-      descr
-    ]); 
-    if (result.length > 0) {
-      id = xNumber(result[0].id);
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':add_station', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return id;
-}
-
-async function add_vendor(
-  vendorid: string, 
-  vendorname: string,
-  vendortype: string,
-  contact: string, 
-  address1: string,
-  address2: string,
-  telno: string,
-  faxno: string,
-  taxcode: string,
-  remark: string
-) {
-  let id = 0;
-  try {
-    const sql = `
-      INSERT INTO vendors
-        (vendorid, vendorname, vendortype, contact, address1, address2, telno, faxno, taxcode, remark)
+      INSERT INTO lessons
+        (lessonid, lessoncode, module_id, lessonno, title, descr, coverid, contentid, mediaid, tags)
         VALUES
         (?,?,?,?,?,?,?,?,?,?)
         RETURNING id;
     `;
     const result = await dbconnect.execute(sql, [
-      vendorid, 
-      vendorname, 
-      vendortype,
-      contact, 
-      address1, 
-      address2, 
-      telno, 
-      faxno, 
-      taxcode, 
-      remark
+      lessonid, 
+      lessoncode, 
+      module_id, 
+      lessonno, 
+      title, 
+      descr, 
+      coverid, 
+      contentid, 
+      mediaid, 
+      tags
     ]); 
     if (result.length > 0) {
       id = xNumber(result[0].id);
     }
   } catch (err) {
-    console.log(incident(THIS_FILENAME+':add_vendor', String(err)));
+    console.log(incident(THIS_FILENAME+':add_lesson', String(err)));
     return K.SYS_INTERNAL_PROCESS_ERROR;
   }
   return id;
 }
 
-async function add_bom(
-  bomid: string, 
-  bomname: string,
+async function add_exam(
+  examcode: string,
+  module_id: number,
+  lesson_id: number,
+  maxscore: number,
+  examminute: number,
+  title: string,
+  caption: string,
   descr: string,
-  goodservice_id: number, 
-  quantity: number,
-  manhour: number,
-  remark: string
+  coverid: string,
+  maturityrating: number,
+  tags: string
 ) {
+  const examid = crypto.randomUUID();
   let id = 0;
   try {
     const sql = `
-      INSERT INTO boms
-        (bomid, bomname, descr, goodservice_id, quantity, manhour, remark)
+      INSERT INTO exams
+        (examid, examcode, module_id, lesson_id, maxscore, examminute, title, caption, descr, coverid, maturityrating, tags)
         VALUES
-        (?,?,?,?,?,?,?)
+        (?,?,?,?,?,?,?,?,?,?,?,?)
         RETURNING id;
     `;
     const result = await dbconnect.execute(sql, [
-      bomid, 
-      bomname, 
-      descr,
-      goodservice_id, 
-      quantity,
-      manhour, 
-      remark
+      examid, 
+      examcode, 
+      module_id, 
+      lesson_id, 
+      maxscore, 
+      examminute, 
+      title, 
+      caption, 
+      descr, 
+      coverid, 
+      maturityrating, 
+      tags
     ]); 
     if (result.length > 0) {
       id = xNumber(result[0].id);
     }
   } catch (err) {
-    console.log(incident(THIS_FILENAME+':add_bom', String(err)));
+    console.log(incident(THIS_FILENAME+':add_exam', String(err)));
     return K.SYS_INTERNAL_PROCESS_ERROR;
   }
   return id;
 }
 
-async function add_bomitem(
-  bom_id: number,
-  itemno: number,
-  goodservice_id: number,
-  quantity: number,
-  remark: string
+async function add_quiz(
+  exam_id: number,
+  quizno: number,
+  quizminute: number,
+  question: string,
+  contentid: string,
+  mediaid: string
 ) {
   let id = 0;
   try {
     const sql = `
-      INSERT INTO bomitems
-        (bom_id, itemno, goodservice_id, quantity, remark)
-        VALUES
-        (?,?,?,?,?)
-        RETURNING id;
-    `;
-    const result = await dbconnect.execute(sql, [
-      bom_id, 
-      itemno, 
-      goodservice_id,
-      quantity, 
-      remark
-    ]); 
-    if (result.length > 0) {
-      id = xNumber(result[0].id);
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':add_bomitem', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return id;
-}
-
-async function add_recipe(
-  recipeid: string, 
-  recipename: string,
-  descr: string, 
-  bom_id: number,
-  docid: string,
-  docrevno: number,
-  refid: string,
-  writername: string,
-  remark: string
-) {
-  let id = 0;
-  try {
-    const sql = `
-      INSERT INTO recipes
-        (recipeid, recipename, descr, bom_id, docid, docrevno, refid, writername, remark)
-        VALUES
-        (?,?,?,?,?,?,?,?,?)
-        RETURNING id;
-    `;
-    const result = await dbconnect.execute(sql, [
-      recipeid, 
-      recipename, 
-      descr,
-      bom_id, 
-      docid, 
-      docrevno, 
-      refid, 
-      writername, 
-      remark
-    ]); 
-    if (result.length > 0) {
-      id = xNumber(result[0].id);
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':add_recipe', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return id;
-}
-
-async function add_recipeitem(
-  recipe_id: number,
-  itemno: number,
-  stepname: string,
-  station_id: number,
-  pictureid: string,
-  contentid: string
-) {
-  let id = 0;
-  try {
-    const sql = `
-      INSERT INTO recipeitems
-        (recipe_id, itemno, stepname, station_id, pictureid, contentid)
+      INSERT INTO quizzes
+        (exam_id, quizno, quizminute, question, contentid, mediaid)
         VALUES
         (?,?,?,?,?,?)
         RETURNING id;
     `;
     const result = await dbconnect.execute(sql, [
-      recipe_id, 
-      itemno, 
-      stepname,
-      station_id, 
-      pictureid, 
-      contentid
+      exam_id, 
+      quizno, 
+      quizminute, 
+      question, 
+      contentid, 
+      mediaid
     ]); 
     if (result.length > 0) {
       id = xNumber(result[0].id);
     }
   } catch (err) {
-    console.log(incident(THIS_FILENAME+':add_recipeitem', String(err)));
+    console.log(incident(THIS_FILENAME+':add_quiz', String(err)));
+    return K.SYS_INTERNAL_PROCESS_ERROR;
+  }
+  return id;
+}
+
+async function add_choice(
+  quiz_id: number,
+  answer: string,
+  choiceno: number,
+  choicescore: number,
+  becorrect: number,
+  mediaid: string,
+  feedbackid: string
+) {
+  let id = 0;
+  try {
+    const sql = `
+      INSERT INTO choices
+        (quiz_id, answer, choiceno, choicescore, becorrect, mediaid, feedbackid)
+        VALUES
+        (?,?,?,?,?,?,?)
+        RETURNING id;
+    `;
+    const result = await dbconnect.execute(sql, [
+      quiz_id, 
+      answer, 
+      choiceno, 
+      choicescore, 
+      becorrect, 
+      mediaid, 
+      feedbackid
+    ]); 
+    if (result.length > 0) {
+      id = xNumber(result[0].id);
+    }
+  } catch (err) {
+    console.log(incident(THIS_FILENAME+':add_choice', String(err)));
     return K.SYS_INTERNAL_PROCESS_ERROR;
   }
   return id;
@@ -343,31 +254,14 @@ async function get_sysvars() {
   return records;
 }
 
-async function get_stores() {
+async function get_module(id: number) {
   let records = [];
   try {
     const sql = `
-      SELECT id, storeid, storename, descr
-        FROM stores
-        ORDER BY id;
-    `;
-    const result = await dbconnect.execute(sql, []);
-    if (result.length > 0) {
-      records = result;
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':get_stores', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return records;
-}
-
-async function get_shelf(id: number) {
-  let records = [];
-  try {
-    const sql = `
-      SELECT id, shelfid, shelfname, descr, store_id
-        FROM shelfs
+      SELECT id, created_at, updated_at, belocked, becancelled, docstatus
+        , moduleid, modulecode, title, caption, descr, coverid
+        , maturityrating, tags, released_at
+        FROM modules
         WHERE id = ?;
     `;
     const result = await dbconnect.execute(sql, [
@@ -377,269 +271,22 @@ async function get_shelf(id: number) {
       records = result;
     }
   } catch (err) {
-    console.log(incident(THIS_FILENAME+':get_shelf', String(err)));
+    console.log(incident(THIS_FILENAME+':get_module', String(err)));
     return K.SYS_INTERNAL_PROCESS_ERROR;
   }
   return records;  
 }
 
-async function get_shelfs(
-  shelfid: string,
-  shelfname: string,
-  descr: string,
-  store_id: any,
-  filter: any
-) {
-  const limit = xNumber(filter.limit);
-  const page = xNumber(filter.page);
-  const sort = xString(filter.sort);
-  // Validation
-  if ((limit <= 0) || (page <= 0)) {
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  let p = page - 1;
-  if (p <= 0) { p = 0; }
-  const offset = p * limit;
-  let sortclause = "ASC";
-  if (sort.toLowerCase() == 'desc') {
-    sortclause = "DESC";
-  }
-  // Prepare SQL
-  let whereclause = " WHERE 1";
-  let argumentarr = [];
-  if (shelfid) {
-    whereclause += " AND shelfid LIKE ?";
-    argumentarr.push('%'+shelfid.trim()+'%');
-  }
-  if (shelfname) {
-    whereclause += " AND shelfname LIKE ?";
-    argumentarr.push('%'+shelfname.trim()+'%');
-  }
-  if (descr) {
-    whereclause += " AND descr LIKE ?";
-    argumentarr.push('%'+descr.trim()+'%');
-  }
-  if (isData(store_id)) {
-    whereclause += " AND store_id IN (0,?)";
-    argumentarr.push(xNumber(store_id));
-  }
-  argumentarr.push(xNumber(limit));
-  argumentarr.push(xNumber(offset));
-  // Execute SQL
-  let records = [];
-  try {
-    const sql = `
-      SELECT id, shelfid, shelfname, descr, store_id
-        FROM shelfs
-        ${whereclause}
-        ORDER BY shelfid ${sortclause}
-        LIMIT ? OFFSET ?;
-    `;
-    const result = await dbconnect.execute(sql, argumentarr);
-    if (result.length > 0) {
-      records = result;
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':get_shelfs', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return records;
-}
-
-async function get_goodstypes() {
-  let records = [];
-  try {
-    const sql = `
-      SELECT id, typeid, typename, descr
-        FROM goodstypes
-        ORDER BY id;
-    `;
-    const result = await dbconnect.execute(sql, []);
-    if (result.length > 0) {
-      records = result;
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':get_goodstypes', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return records;
-}
-
-async function get_goodservice(id: number) {
-  let records = [];
-  try {
-    const sql = `
-      SELECT id, belocked, goodsid, goodsname, descr, goodstype_id
-        , unitcost, minstockqty, maxstockqty, pictureid, remark
-        FROM goodservices
-        WHERE id = ?;
-    `;
-    const result = await dbconnect.execute(sql, [
-      id
-    ]);
-    if (result.length > 0) {
-      records = result;
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':get_goodservice', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return records;  
-}
-
-async function get_goodservices(
-  goodsid: string, 
-  goodsname: string,
-  descr: string, 
-  goodstype_id: any,
-  unitcostfrom: any,
-  unitcostto: any,
-  remark: string,
-  filter: any
-) {
-  const limit = xNumber(filter.limit);
-  const page = xNumber(filter.page);
-  const sort = xString(filter.sort);
-  // Validation
-  if ((limit <= 0) || (page <= 0)) {
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  let p = page - 1;
-  if (p <= 0) { p = 0; }
-  const offset = p * limit;
-  let sortclause = "ASC";
-  if (sort.toLowerCase() == 'desc') {
-    sortclause = "DESC";
-  }
-  // Prepare SQL
-  let whereclause = " WHERE 1";
-  let argumentarr = [];
-  if (goodsid) {
-    whereclause += " AND goodsid LIKE ?";
-    argumentarr.push('%'+goodsid.trim()+'%');
-  }
-  if (goodsname) {
-    whereclause += " AND goodsname LIKE ?";
-    argumentarr.push('%'+goodsname.trim()+'%');
-  }
-  if (descr) {
-    whereclause += " AND descr LIKE ?";
-    argumentarr.push('%'+descr.trim()+'%');
-  }
-  if (isData(goodstype_id)) {
-    whereclause += " AND goodstype_id = ?";
-    argumentarr.push(xNumber(goodstype_id));
-  }
-  if (isData(unitcostfrom)) {
-    whereclause += " AND unitcost >= ?";
-    argumentarr.push(xNumber(unitcostfrom));
-  }
-  if (isData(unitcostto)) {
-    whereclause += " AND unitcost <= ?";
-    argumentarr.push(xNumber(unitcostto));
-  }
-  if (remark) {
-    whereclause += " AND remark LIKE ?";
-    argumentarr.push('%'+remark.trim()+'%');
-  }
-  argumentarr.push(xNumber(limit));
-  argumentarr.push(xNumber(offset));
-  // Execute SQL
-  let records = [];
-  try {
-    const sql = `
-      SELECT id, belocked, goodsid, goodsname, descr, goodstype_id
-        , unitcost, minstockqty, maxstockqty, pictureid, remark
-        FROM goodservices
-        ${whereclause}
-        ORDER BY goodsid ${sortclause}
-        LIMIT ? OFFSET ?;
-    `;
-    const result = await dbconnect.execute(sql, argumentarr);
-    if (result.length > 0) {
-      records = result;
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':get_goodservices', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return records;
-}
-
-async function get_station(id: number) {
-  let records = [];
-  try {
-    const sql = `
-      SELECT id, stationid, stationname, descr
-        FROM stations
-        WHERE id = ?;
-    `;
-    const result = await dbconnect.execute(sql, [
-      id
-    ]);
-    if (result.length > 0) {
-      records = result;
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':get_station', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return records;  
-}
-
-async function get_stations() {
-  let records = [];
-  try {
-    const sql = `
-      SELECT id, stationid, stationname, descr
-        FROM stations
-        ORDER BY stationid;
-    `;
-    const result = await dbconnect.execute(sql, []);
-    if (result.length > 0) {
-      records = result;
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':get_stations', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return records;
-}
-
-async function get_vendor(id: number) {
-  let records = [];
-  try {
-    const sql = `
-      SELECT id, belocked, vendorid, vendorname, vendortype, contact
-        , address1, address2, telno, faxno, taxcode, remark
-        FROM vendors
-        WHERE id = ?;
-    `;
-    const result = await dbconnect.execute(sql, [
-      id
-    ]);
-    if (result.length > 0) {
-      records = result;
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':get_vendor', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return records;  
-}
-
-async function get_vendors(
+async function get_modules(
   belocked: any,
-  vendorid: string,
-  vendorname: string,
-  vendortype: string,
-  contact: string,
-  address1: string,
-  address2: string,
-  telno: string,
-  faxno: string,
-  taxcode: string,
-  remark: string,
+  becancelled: any,
+  docstatus: any,
+  modulecode: string,
+  title: string,
+  caption: string,
+  descr: string,
+  maturityrating: any,
+  tags: any,
   filter: any
 ) {
   const limit = xNumber(filter.limit);
@@ -663,45 +310,47 @@ async function get_vendors(
     whereclause += " AND belocked = ?";
     argumentarr.push(xNumber(belocked));
   }
-  if (vendorid) {
-    whereclause += " AND vendorid LIKE ?";
-    argumentarr.push('%'+vendorid.trim()+'%');
+  if (isData(becancelled)) {
+    whereclause += " AND becancelled = ?";
+    argumentarr.push(xNumber(becancelled));
   }
-  if (vendorname) {
-    whereclause += " AND vendorname LIKE ?";
-    argumentarr.push('%'+vendorname.trim()+'%');
+  if (isData(docstatus)) {
+    whereclause += " AND docstatus = ?";
+    argumentarr.push(xNumber(docstatus));
   }
-  if (vendortype) {
-    whereclause += " AND vendortype LIKE ?";
-    argumentarr.push('%'+vendortype.trim()+'%');
+  if (modulecode) {
+    whereclause += " AND modulecode LIKE ?";
+    argumentarr.push('%'+modulecode.trim()+'%');
   }
-  if (contact) {
-    whereclause += " AND contact LIKE ?";
-    argumentarr.push('%'+contact.trim()+'%');
+  if (title) {
+    whereclause += " AND title LIKE ?";
+    argumentarr.push('%'+title.trim()+'%');
   }
-  if (address1) {
-    whereclause += " AND address1 LIKE ?";
-    argumentarr.push('%'+address1.trim()+'%');
+  if (caption) {
+    whereclause += " AND caption LIKE ?";
+    argumentarr.push('%'+caption.trim()+'%');
   }
-  if (address2) {
-    whereclause += " AND address2 LIKE ?";
-    argumentarr.push('%'+address2.trim()+'%');
+  if (descr) {
+    whereclause += " AND descr LIKE ?";
+    argumentarr.push('%'+descr.trim()+'%');
   }
-  if (telno) {
-    whereclause += " AND telno LIKE ?";
-    argumentarr.push('%'+telno.trim()+'%');
+  if (isData(maturityrating)) {
+    whereclause += " AND maturityrating = ?";
+    argumentarr.push(xNumber(maturityrating));
   }
-  if (faxno) {
-    whereclause += " AND faxno LIKE ?";
-    argumentarr.push('%'+faxno.trim()+'%');
-  }
-  if (taxcode) {
-    whereclause += " AND taxcode LIKE ?";
-    argumentarr.push('%'+taxcode.trim()+'%');
-  }
-  if (remark) {
-    whereclause += " AND remark LIKE ?";
-    argumentarr.push('%'+remark.trim()+'%');
+  if (isData(tags)) {
+    const tagarr = toArray(tags);
+    if (tagarr.length > 0) {
+      whereclause += " AND (";
+      for (let i = 0; i < tagarr.length; i++) {
+        if (i > 0) {
+          whereclause += " OR";
+        }
+        whereclause += " LOWER(tags) LIKE LOWER(?)";
+        argumentarr.push('%"'+tagarr[i]+'"%');
+      }
+      whereclause += ")";
+    }
   }
   argumentarr.push(xNumber(limit));
   argumentarr.push(xNumber(offset));
@@ -709,11 +358,12 @@ async function get_vendors(
   let records = [];
   try {
     const sql = `
-      SELECT id, belocked, vendorid, vendorname, vendortype, contact
-        , address1, address2, telno, faxno, taxcode, remark
-        FROM vendors
+      SELECT id, created_at, updated_at, belocked, becancelled, docstatus
+        , moduleid, modulecode, title, caption, descr, coverid
+        , maturityrating, tags, released_at
+        FROM modules
         ${whereclause}
-        ORDER BY vendorid ${sortclause}
+        ORDER BY modulecode ${sortclause}
         LIMIT ? OFFSET ?;
     `;
     const result = await dbconnect.execute(sql, argumentarr);
@@ -721,21 +371,20 @@ async function get_vendors(
       records = result;
     }
   } catch (err) {
-    console.log(incident(THIS_FILENAME+':get_vendors', String(err)));
+    console.log(incident(THIS_FILENAME+':get_modules', String(err)));
     return K.SYS_INTERNAL_PROCESS_ERROR;
   }
   return records;
 }
 
-async function get_bom(id: number) {
+async function get_lesson(id: number) {
   let records = [];
   try {
     const sql = `
-      SELECT id, created_at, updated_at, belocked
-        , bomid, bomname, descr
-        , goodservice_id, quantity
-        , manhour, remark
-        FROM boms
+      SELECT id, created_at, updated_at, belocked, becancelled, docstatus
+        , lessonid, lessoncode, module_id, lessonno, title, descr, coverid
+        , contentid, mediaid, tags, released_at
+        FROM lessons
         WHERE id = ?;
     `;
     const result = await dbconnect.execute(sql, [
@@ -745,21 +394,128 @@ async function get_bom(id: number) {
       records = result;
     }
   } catch (err) {
-    console.log(incident(THIS_FILENAME+':get_bom', String(err)));
+    console.log(incident(THIS_FILENAME+':get_lesson', String(err)));
     return K.SYS_INTERNAL_PROCESS_ERROR;
   }
   return records;  
 }
 
-async function get_boms(
-  belocked: any,
-  bomid: string, 
-  bomname: string,
+async function get_lessons(
+  module_id: number,
+  lessoncode: string,
+  title: string,
   descr: string,
-  goodservice_id: any, 
-  manhourfrom: any,
-  manhourto: any,
-  remark: string,
+  tags: string,
+  filter: any
+) {
+  const limit = xNumber(filter.limit);
+  const page = xNumber(filter.page);
+  const sort = xString(filter.sort);
+  // Validation
+  if ((limit <= 0) || (page <= 0)) {
+    return K.SYS_INTERNAL_PROCESS_ERROR;
+  }
+  let p = page - 1;
+  if (p <= 0) { p = 0; }
+  const offset = p * limit;
+  let sortclause = "ASC";
+  if (sort.toLowerCase() == 'desc') {
+    sortclause = "DESC";
+  }
+  // Prepare SQL
+  let whereclause = " WHERE 1";
+  let argumentarr = [];
+  if (isData(module_id)) {
+    whereclause += " AND module_id = ?";
+    argumentarr.push(xNumber(module_id));
+  }
+  if (lessoncode) {
+    whereclause += " AND lessoncode LIKE ?";
+    argumentarr.push('%'+lessoncode.trim()+'%');
+  }
+  if (title) {
+    whereclause += " AND title LIKE ?";
+    argumentarr.push('%'+title.trim()+'%');
+  }
+  if (descr) {
+    whereclause += " AND descr LIKE ?";
+    argumentarr.push('%'+descr.trim()+'%');
+  }
+  if (isData(tags)) {
+    const tagarr = toArray(tags);
+    if (tagarr.length > 0) {
+      whereclause += " AND (";
+      for (let i = 0; i < tagarr.length; i++) {
+        if (i > 0) {
+          whereclause += " OR";
+        }
+        whereclause += " LOWER(tags) LIKE LOWER(?)";
+        argumentarr.push('%"'+tagarr[i]+'"%');
+      }
+      whereclause += ")";
+    }
+  }
+  argumentarr.push(xNumber(limit));
+  argumentarr.push(xNumber(offset));
+  // Execute SQL
+  let records = [];
+  try {
+    const sql = `
+      SELECT id, created_at, updated_at, belocked, becancelled, docstatus
+        , lessonid, lessoncode, module_id, lessonno, title, descr, coverid
+        , contentid, mediaid, tags, released_at
+        FROM lessons
+        ${whereclause}
+        ORDER BY lessonno ${sortclause}, id
+        LIMIT ? OFFSET ?;
+    `;
+    const result = await dbconnect.execute(sql, argumentarr);
+    if (result.length > 0) {
+      records = result;
+    }
+  } catch (err) {
+    console.log(incident(THIS_FILENAME+':get_lessons', String(err)));
+    return K.SYS_INTERNAL_PROCESS_ERROR;
+  }
+  return records;
+}
+
+async function get_exam(id: number) {
+  let records = [];
+  try {
+    const sql = `
+      SELECT id, created_at, updated_at, belocked, becancelled, docstatus
+        , examid, examcode, module_id, lesson_id, maxscore, examminute  
+        , title, caption, descr, coverid
+        , maturityrating, tags, released_at
+        FROM exams
+        WHERE id = ?;
+    `;
+    const result = await dbconnect.execute(sql, [
+      id
+    ]);
+    if (result.length > 0) {
+      records = result;
+    }
+  } catch (err) {
+    console.log(incident(THIS_FILENAME+':get_exam', String(err)));
+    return K.SYS_INTERNAL_PROCESS_ERROR;
+  }
+  return records;  
+}
+
+async function get_exams(
+  belocked: any,
+  becancelled: any,
+  docstatus: any,
+  examcode: string,
+  module_id: any,
+  lesson_id: any,
+  title: string,
+  caption: string,
+  descr: string,
+  maturityrating: any,
+  tags: any,
   filter: any
 ) {
   const limit = xNumber(filter.limit);
@@ -783,33 +539,55 @@ async function get_boms(
     whereclause += " AND belocked = ?";
     argumentarr.push(xNumber(belocked));
   }
-  if (bomid) {
-    whereclause += " AND bomid LIKE ?";
-    argumentarr.push('%'+bomid.trim()+'%');
+  if (isData(becancelled)) {
+    whereclause += " AND becancelled = ?";
+    argumentarr.push(xNumber(becancelled));
   }
-  if (bomname) {
-    whereclause += " AND bomname LIKE ?";
-    argumentarr.push('%'+bomname.trim()+'%');
+  if (isData(docstatus)) {
+    whereclause += " AND docstatus = ?";
+    argumentarr.push(xNumber(docstatus));
+  }
+  if (examcode) {
+    whereclause += " AND examcode LIKE ?";
+    argumentarr.push('%'+examcode.trim()+'%');
+  }
+  if (isData(module_id)) {
+    whereclause += " AND module_id = ?";
+    argumentarr.push(xNumber(module_id));
+  }
+  if (isData(lesson_id)) {
+    whereclause += " AND lesson_id = ?";
+    argumentarr.push(xNumber(lesson_id));
+  }
+  if (title) {
+    whereclause += " AND title LIKE ?";
+    argumentarr.push('%'+title.trim()+'%');
+  }
+  if (caption) {
+    whereclause += " AND caption LIKE ?";
+    argumentarr.push('%'+caption.trim()+'%');
   }
   if (descr) {
     whereclause += " AND descr LIKE ?";
     argumentarr.push('%'+descr.trim()+'%');
   }
-  if (isData(goodservice_id)) {
-    whereclause += " AND goodservice_id = ?";
-    argumentarr.push(xNumber(goodservice_id));
+  if (isData(maturityrating)) {
+    whereclause += " AND maturityrating = ?";
+    argumentarr.push(xNumber(maturityrating));
   }
-  if (isData(manhourfrom)) {
-    whereclause += " AND manhour >= ?";
-    argumentarr.push(xNumber(manhourfrom));
-  }
-  if (isData(manhourto)) {
-    whereclause += " AND manhour <= ?";
-    argumentarr.push(xNumber(manhourto));
-  }
-  if (remark) {
-    whereclause += " AND remark LIKE ?";
-    argumentarr.push('%'+remark.trim()+'%');
+  if (isData(tags)) {
+    const tagarr = toArray(tags);
+    if (tagarr.length > 0) {
+      whereclause += " AND (";
+      for (let i = 0; i < tagarr.length; i++) {
+        if (i > 0) {
+          whereclause += " OR";
+        }
+        whereclause += " LOWER(tags) LIKE LOWER(?)";
+        argumentarr.push('%"'+tagarr[i]+'"%');
+      }
+      whereclause += ")";
+    }
   }
   argumentarr.push(xNumber(limit));
   argumentarr.push(xNumber(offset));
@@ -817,13 +595,13 @@ async function get_boms(
   let records = [];
   try {
     const sql = `
-      SELECT id, created_at, updated_at, belocked
-        , bomid, bomname, descr
-        , goodservice_id, quantity
-        , manhour, remark
-        FROM boms
+      SELECT id, created_at, updated_at, belocked, becancelled, docstatus
+        , examid, examcode, module_id, lesson_id, maxscore, examminute  
+        , title, caption, descr, coverid
+        , maturityrating, tags, released_at
+        FROM exams
         ${whereclause}
-        ORDER BY bomid ${sortclause}
+        ORDER BY examcode ${sortclause}
         LIMIT ? OFFSET ?;
     `;
     const result = await dbconnect.execute(sql, argumentarr);
@@ -831,45 +609,20 @@ async function get_boms(
       records = result;
     }
   } catch (err) {
-    console.log(incident(THIS_FILENAME+':get_boms', String(err)));
+    console.log(incident(THIS_FILENAME+':get_exams', String(err)));
     return K.SYS_INTERNAL_PROCESS_ERROR;
   }
   return records;
 }
 
-async function get_bomitems(bom_id: number) {
+async function get_quiz(id: number) {
   let records = [];
   try {
     const sql = `
-      SELECT bi.id, bi.itemno, bi.goodservice_id
-        , gs.goodsid, gs.goodsname, gs.goodstype_id, gs.pictureid
-        , bi.quantity, bi.remark
-        FROM bomitems bi
-        LEFT JOIN goodservices gs ON gs.id = bi.goodservice_id
-        WHERE bi.bom_id = ?
-        ORDER BY bi.itemno;
-    `;
-    const result = await dbconnect.execute(sql, [
-      bom_id
-    ]);
-    if (result.length > 0) {
-      records = result;
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':get_bomitems', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return records;  
-}
-
-async function get_recipe(id: number) {
-  let records = [];
-  try {
-    const sql = `
-      SELECT id, created_at, updated_at
-        , recipeid, recipename, descr, bom_id
-        , docid, docrevno, refid, writername, remark
-        FROM recipes
+      SELECT id, created_at, updated_at, belocked, becancelled, docstatus
+        , exam_id, quizno, quizminute, question
+        , contentid, mediaid, released_at
+        FROM quizzes
         WHERE id = ?;
     `;
     const result = await dbconnect.execute(sql, [
@@ -879,22 +632,18 @@ async function get_recipe(id: number) {
       records = result;
     }
   } catch (err) {
-    console.log(incident(THIS_FILENAME+':get_recipe', String(err)));
+    console.log(incident(THIS_FILENAME+':get_quiz', String(err)));
     return K.SYS_INTERNAL_PROCESS_ERROR;
   }
   return records;  
 }
 
-async function get_recipes(
-  recipeid: string, 
-  recipename: string,
-  descr: string, 
-  bom_id: any,
-  docid: string,
-  docrevno: any,
-  refid: string,
-  writername: string,
-  remark: string,
+async function get_quizzes(
+  belocked: any,
+  becancelled: any,
+  docstatus: any,
+  exam_id: any,
+  question: string,
   filter: any
 ) {
   const limit = xNumber(filter.limit);
@@ -914,41 +663,25 @@ async function get_recipes(
   // Prepare SQL
   let whereclause = " WHERE 1";
   let argumentarr = [];
-  if (recipeid) {
-    whereclause += " AND recipeid LIKE ?";
-    argumentarr.push('%'+recipeid.trim()+'%');
+  if (isData(belocked)) {
+    whereclause += " AND belocked = ?";
+    argumentarr.push(xNumber(belocked));
   }
-  if (recipename) {
-    whereclause += " AND recipename LIKE ?";
-    argumentarr.push('%'+recipename.trim()+'%');
+  if (isData(becancelled)) {
+    whereclause += " AND becancelled = ?";
+    argumentarr.push(xNumber(becancelled));
   }
-  if (descr) {
-    whereclause += " AND descr LIKE ?";
-    argumentarr.push('%'+descr.trim()+'%');
+  if (isData(docstatus)) {
+    whereclause += " AND docstatus = ?";
+    argumentarr.push(xNumber(docstatus));
   }
-  if (isData(bom_id)) {
-    whereclause += " AND bom_id = ?";
-    argumentarr.push(xNumber(bom_id));
+  if (isData(exam_id)) {
+    whereclause += " AND exam_id = ?";
+    argumentarr.push(xNumber(exam_id));
   }
-  if (docid) {
-    whereclause += " AND docid LIKE ?";
-    argumentarr.push('%'+docid.trim()+'%');
-  }
-  if (isData(docrevno)) {
-    whereclause += " AND docrevno = ?";
-    argumentarr.push(xNumber(docrevno));
-  }
-  if (refid) {
-    whereclause += " AND refid LIKE ?";
-    argumentarr.push('%'+refid.trim()+'%');
-  }
-  if (writername) {
-    whereclause += " AND writername LIKE ?";
-    argumentarr.push('%'+writername.trim()+'%');
-  }
-  if (remark) {
-    whereclause += " AND remark LIKE ?";
-    argumentarr.push('%'+remark.trim()+'%');
+  if (question) {
+    whereclause += " AND question LIKE ?";
+    argumentarr.push('%'+question.trim()+'%');
   }
   argumentarr.push(xNumber(limit));
   argumentarr.push(xNumber(offset));
@@ -956,12 +689,12 @@ async function get_recipes(
   let records = [];
   try {
     const sql = `
-      SELECT id, created_at, updated_at
-        , recipeid, recipename, descr, bom_id
-        , docid, docrevno, refid, writername, remark
-        FROM recipes
+      SELECT id, created_at, updated_at, belocked, becancelled, docstatus
+        , exam_id, quizno, quizminute, question
+        , contentid, mediaid, released_at
+        FROM quizzes
         ${whereclause}
-        ORDER BY recipeid ${sortclause}
+        ORDER BY quizno ${sortclause}, id
         LIMIT ? OFFSET ?;
     `;
     const result = await dbconnect.execute(sql, argumentarr);
@@ -969,85 +702,30 @@ async function get_recipes(
       records = result;
     }
   } catch (err) {
-    console.log(incident(THIS_FILENAME+':get_recipes', String(err)));
+    console.log(incident(THIS_FILENAME+':get_quizzes', String(err)));
     return K.SYS_INTERNAL_PROCESS_ERROR;
   }
   return records;
 }
 
-async function get_recipeitem(id: number) {
+async function get_choices(quiz_id: number) {
   let records = [];
   try {
     const sql = `
-      SELECT id, created_at, updated_at, recipe_id
-        , itemno, stepname, station_id
-        , pictureid, contentid
-        FROM recipeitems
-        WHERE id = ?;
+      SELECT id, created_at, updated_at
+        , quiz_id, answer, choiceno, choicescore, becorrect
+        , mediaid, feedbackid
+        FROM choices
+        ORDER BY choiceno, id;
     `;
     const result = await dbconnect.execute(sql, [
-      id
+      quiz_id
     ]);
     if (result.length > 0) {
       records = result;
     }
   } catch (err) {
-    console.log(incident(THIS_FILENAME+':get_recipeitem', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return records;  
-}
-
-async function get_recipeitems(
-  recipe_id: number,
-  stepname: string,
-  filter: any
-) {
-  const limit = xNumber(filter.limit);
-  const page = xNumber(filter.page);
-  const sort = xString(filter.sort);
-  // Validation
-  if ((limit <= 0) || (page <= 0)) {
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  let p = page - 1;
-  if (p <= 0) { p = 0; }
-  const offset = p * limit;
-  let sortclause = "ASC";
-  if (sort.toLowerCase() == 'desc') {
-    sortclause = "DESC";
-  }
-  // Prepare SQL
-  let whereclause = " WHERE 1";
-  let argumentarr = [];
-  if (isData(recipe_id)) {
-    whereclause += " AND recipe_id = ?";
-    argumentarr.push(xNumber(recipe_id));
-  }
-  if (stepname) {
-    whereclause += " AND stepname LIKE ?";
-    argumentarr.push('%'+stepname.trim()+'%');
-  }
-  argumentarr.push(xNumber(limit));
-  argumentarr.push(xNumber(offset));
-  // Execute SQL
-  let records = [];
-  try {
-    const sql = `
-      SELECT id, created_at, updated_at, recipe_id
-        , itemno, stepname, station_id
-        , pictureid, contentid
-        FROM recipeitems
-        ${whereclause}
-        ORDER BY itemno ${sortclause}, id
-        LIMIT ? OFFSET ?;
-    `;
-    const result = await dbconnect.execute(sql, argumentarr);
-    if (result.length > 0) {
-      records = result;
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':get_recipeitems', String(err)));
+    console.log(incident(THIS_FILENAME+':get_choices', String(err)));
     return K.SYS_INTERNAL_PROCESS_ERROR;
   }
   return records;
@@ -1084,608 +762,363 @@ async function update_sysvar(
   return affectedRows;
 }
 
-async function update_shelf(
+async function update_module(
   id: number,
-  shelfid: string, 
-  shelfname: string,
+  modulecode: string,
+  title: string,
+  caption: string,
   descr: string,
-  store_id: number
+  coverid: string,
+  maturityrating: number,
+  tags: string
 ) {
   let affectedRows = 0;
   try {
     const sql = `
-      UPDATE shelfs
-        SET shelfid = ?
-          , shelfname = ?
+      UPDATE modules
+        SET modulecode = ?
+          , title = ?
+          , caption = ?
           , descr = ?
-          , store_id = ?
+          , coverid = ?
+          , maturityrating = ?
+          , tags = ?
         WHERE id = ?;
     `;
     const result = await dbconnect.execute(sql, [
-      shelfid, 
-      shelfname, 
+      modulecode, 
+      title, 
+      caption, 
       descr, 
-      store_id, 
+      coverid, 
+      maturityrating, 
+      tags, 
       id
     ]); // OkPacket { affectedRows: 1, insertId: 0n, warningStatus: 0 }
     if (result.affectedRows) {
       affectedRows = xNumber(result.affectedRows);
     }
   } catch (err) {
-    console.log(incident(THIS_FILENAME+':update_shelf', String(err)));
+    console.log(incident(THIS_FILENAME+':update_module', String(err)));
     return K.SYS_INTERNAL_PROCESS_ERROR;
   }
   return affectedRows;
 }
 
-async function update_goodservice(
+async function update_lesson(
   id: number,
-  belocked: number,
-  goodsid: string, 
-  goodsname: string,
-  descr: string, 
-  goodstype_id: number,
-  unitcost: number,
-  minstockqty: number,
-  maxstockqty: number,
-  pictureid: string,
-  remark: string
-) {
-  let affectedRows = 0;
-  try {
-    const sql = `
-      UPDATE goodservices
-        SET belocked = ?
-          , goodsid = ?
-          , goodsname = ?
-          , descr = ?
-          , goodstype_id = ?
-          , unitcost = ?
-          , minstockqty = ?
-          , maxstockqty = ?
-          , pictureid = ?
-          , remark = ?
-        WHERE id = ?;
-    `;
-    const result = await dbconnect.execute(sql, [
-      belocked, 
-      goodsid,
-      goodsname,
-      descr,
-      goodstype_id,
-      unitcost,
-      minstockqty,
-      maxstockqty,
-      pictureid,
-      remark, 
-      id
-    ]); // OkPacket { affectedRows: 1, insertId: 0n, warningStatus: 0 }
-    if (result.affectedRows) {
-      affectedRows = xNumber(result.affectedRows);
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':update_goodservice', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return affectedRows;
-}
-
-async function update_station(
-  id: number,
-  stationid: string, 
-  stationname: string,
-  descr: string
-) {
-  let affectedRows = 0;
-  try {
-    const sql = `
-      UPDATE stations
-        SET stationid = ?
-          , stationname = ?
-          , descr = ?
-        WHERE id = ?;
-    `;
-    const result = await dbconnect.execute(sql, [
-      stationid,
-      stationname,
-      descr,
-      id
-    ]); // OkPacket { affectedRows: 1, insertId: 0n, warningStatus: 0 }
-    if (result.affectedRows) {
-      affectedRows = xNumber(result.affectedRows);
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':update_station', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return affectedRows;
-}
-
-async function update_vendor(
-  id: number,
-  belocked: number,
-  vendorid: string, 
-  vendorname: string,
-  vendortype: string,
-  contact: string, 
-  address1: string,
-  address2: string,
-  telno: string,
-  faxno: string,
-  taxcode: string,
-  remark: string
-) {
-  let affectedRows = 0;
-  try {
-    const sql = `
-      UPDATE vendors
-        SET belocked = ?
-          , vendorid = ?
-          , vendorname = ?
-          , vendortype = ?
-          , contact = ?
-          , address1 = ?
-          , address2 = ?
-          , telno = ?
-          , faxno = ?
-          , taxcode = ?
-          , remark = ?
-        WHERE id = ?;
-    `;
-    const result = await dbconnect.execute(sql, [
-      belocked, 
-      vendorid, 
-      vendorname, 
-      vendortype,
-      contact, 
-      address1, 
-      address2, 
-      telno, 
-      faxno, 
-      taxcode, 
-      remark, 
-      id
-    ]); // OkPacket { affectedRows: 1, insertId: 0n, warningStatus: 0 }
-    if (result.affectedRows) {
-      affectedRows = xNumber(result.affectedRows);
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':update_vendor', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return affectedRows;
-}
-
-async function update_bom(
-  id: number,
-  belocked: number,
-  bomid: string, 
-  bomname: string,
+  lessoncode: string,
+  module_id: number,
+  lessonno: number,
+  title: string,
   descr: string,
-  goodservice_id: number, 
-  quantity: number,
-  manhour: number,
-  remark: string
+  coverid: string,
+  contentid: string,
+  mediaid: string,
+  tags: string
 ) {
   let affectedRows = 0;
   try {
     const sql = `
-      UPDATE boms
-        SET belocked = ?
-          , bomid = ?
-          , bomname = ?
+      UPDATE lessons
+        SET lessoncode = ?
+          , module_id = ?
+          , lessonno = ?
+          , title = ?
           , descr = ?
-          , goodservice_id = ?
-          , quantity = ?
-          , manhour = ?
-          , remark = ?
-        WHERE id = ?;
-    `;
-    const result = await dbconnect.execute(sql, [
-      belocked, 
-      bomid, 
-      bomname, 
-      descr,
-      goodservice_id, 
-      quantity,
-      manhour, 
-      remark, 
-      id
-    ]); // OkPacket { affectedRows: 1, insertId: 0n, warningStatus: 0 }
-    if (result.affectedRows) {
-      affectedRows = xNumber(result.affectedRows);
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':update_bom', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return affectedRows;
-}
-
-async function update_recipe(
-  id: number,
-  recipeid: string, 
-  recipename: string,
-  descr: string, 
-  bom_id: number,
-  docid: string,
-  docrevno: number,
-  refid: string,
-  writername: string,
-  remark: string
-) {
-  let affectedRows = 0;
-  try {
-    const sql = `
-      UPDATE recipes
-        SET recipeid = ?
-          , recipename = ?
-          , descr = ?
-          , bom_id = ?
-          , docid = ?
-          , docrevno = ?
-          , refid = ?
-          , writername = ?
-          , remark = ?
-        WHERE id = ?;
-    `;
-    const result = await dbconnect.execute(sql, [
-      recipeid, 
-      recipename, 
-      descr,
-      bom_id, 
-      docid, 
-      docrevno, 
-      refid, 
-      writername, 
-      remark, 
-      id
-    ]); // OkPacket { affectedRows: 1, insertId: 0n, warningStatus: 0 }
-    if (result.affectedRows) {
-      affectedRows = xNumber(result.affectedRows);
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':update_recipe', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return affectedRows;
-}
-
-async function update_recipeitem(
-  id: number,
-  recipe_id: number,
-  itemno: number,
-  stepname: string,
-  station_id: number,
-  pictureid: string,
-  contentid: string
-) {
-  let affectedRows = 0;
-  try {
-    const sql = `
-      UPDATE recipeitems
-        SET recipe_id = ?
-          , itemno = ?
-          , stepname = ?
-          , station_id = ?
-          , pictureid = ?
+          , coverid = ?
           , contentid = ?
+          , mediaid = ?
+          , tags = ?
         WHERE id = ?;
     `;
     const result = await dbconnect.execute(sql, [
-      recipe_id, 
-      itemno, 
-      stepname,
-      station_id, 
-      pictureid, 
+      lessoncode, 
+      module_id, 
+      lessonno, 
+      title, 
+      descr, 
+      coverid, 
       contentid, 
+      mediaid, 
+      tags, 
       id
     ]); // OkPacket { affectedRows: 1, insertId: 0n, warningStatus: 0 }
     if (result.affectedRows) {
       affectedRows = xNumber(result.affectedRows);
     }
   } catch (err) {
-    console.log(incident(THIS_FILENAME+':update_recipeitem', String(err)));
+    console.log(incident(THIS_FILENAME+':update_lesson', String(err)));
     return K.SYS_INTERNAL_PROCESS_ERROR;
   }
   return affectedRows;
 }
 
-async function delete_shelf(id: number) {
-  let affectedRows = 0;
-  try {
-    const sql = `
-      DELETE FROM shelfs
-        WHERE id = ?;
-    `;
-    const result = await dbconnect.execute(sql, [
-      id
-    ]); // OkPacket { affectedRows: 1, insertId: 0n, warningStatus: 0 }
-    if (result.affectedRows) {
-      affectedRows = xNumber(result.affectedRows);
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':delete_shelf', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return affectedRows;
-}
-
-async function delete_goodservice(id: number) {
-  let affectedRows = 0;
-  try {
-    const sql = `
-      DELETE FROM goodservices
-        WHERE id = ?;
-    `;
-    const result = await dbconnect.execute(sql, [
-      id
-    ]); // OkPacket { affectedRows: 1, insertId: 0n, warningStatus: 0 }
-    if (result.affectedRows) {
-      affectedRows = xNumber(result.affectedRows);
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':delete_goodservice', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return affectedRows;
-}
-
-async function delete_station(id: number) {
-  let affectedRows = 0;
-  try {
-    const sql = `
-      DELETE FROM stations
-        WHERE id = ?;
-    `;
-    const result = await dbconnect.execute(sql, [
-      id
-    ]); // OkPacket { affectedRows: 1, insertId: 0n, warningStatus: 0 }
-    if (result.affectedRows) {
-      affectedRows = xNumber(result.affectedRows);
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':delete_station', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return affectedRows;
-}
-
-async function delete_vendor(id: number) {
-  let affectedRows = 0;
-  try {
-    const sql = `
-      DELETE FROM vendors
-        WHERE id = ?;
-    `;
-    const result = await dbconnect.execute(sql, [
-      id
-    ]); // OkPacket { affectedRows: 1, insertId: 0n, warningStatus: 0 }
-    if (result.affectedRows) {
-      affectedRows = xNumber(result.affectedRows);
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':delete_vendor', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return affectedRows;
-}
-
-async function delete_bom(id: number) {
-  let affectedRows = 0;
-  try {
-    const sql = `
-      DELETE FROM boms
-        WHERE id = ?;
-    `;
-    const result = await dbconnect.execute(sql, [
-      id
-    ]); // OkPacket { affectedRows: 1, insertId: 0n, warningStatus: 0 }
-    if (result.affectedRows) {
-      affectedRows = xNumber(result.affectedRows);
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':delete_bom', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return affectedRows;
-}
-
-async function delete_bomitems(bom_id: number) {
-  let affectedRows = 0;
-  try {
-    const sql = `
-      DELETE FROM bomitems
-        WHERE bom_id = ?;
-    `;
-    const result = await dbconnect.execute(sql, [
-      bom_id
-    ]); // OkPacket { affectedRows: 1, insertId: 0n, warningStatus: 0 }
-    if (result.affectedRows) {
-      affectedRows = xNumber(result.affectedRows);
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':delete_bomitems', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return affectedRows;
-}
-
-async function delete_recipe(id: number) {
-  let affectedRows = 0;
-  try {
-    const sql = `
-      DELETE FROM recipes
-        WHERE id = ?;
-    `;
-    const result = await dbconnect.execute(sql, [
-      id
-    ]); // OkPacket { affectedRows: 1, insertId: 0n, warningStatus: 0 }
-    if (result.affectedRows) {
-      affectedRows = xNumber(result.affectedRows);
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':delete_recipe', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return affectedRows;
-}
-
-async function delete_recipeitem(id: number) {
-  let affectedRows = 0;
-  try {
-    const sql = `
-      DELETE FROM recipeitems
-        WHERE id = ?;
-    `;
-    const result = await dbconnect.execute(sql, [
-      id
-    ]); // OkPacket { affectedRows: 1, insertId: 0n, warningStatus: 0 }
-    if (result.affectedRows) {
-      affectedRows = xNumber(result.affectedRows);
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':delete_recipeitem', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return affectedRows;
-}
-
-async function delete_recipeitems(recipe_id: number) {
-  let affectedRows = 0;
-  try {
-    const sql = `
-      DELETE FROM recipeitems
-        WHERE recipe_id = ?;
-    `;
-    const result = await dbconnect.execute(sql, [
-      recipe_id
-    ]); // OkPacket { affectedRows: 1, insertId: 0n, warningStatus: 0 }
-    if (result.affectedRows) {
-      affectedRows = xNumber(result.affectedRows);
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':delete_recipeitems', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return affectedRows;
-}
-
-async function count_shelfs(
-  shelfid: string,
-  shelfname: string,
+async function update_exam(
+  id: number,
+  examcode: string,
+  module_id: number,
+  lesson_id: number,
+  maxscore: number,
+  examminute: number,
+  title: string,
+  caption: string,
   descr: string,
-  store_id: any
+  coverid: string,
+  maturityrating: number,
+  tags: string
 ) {
-  // Prepare SQL
-  let whereclause = " WHERE 1";
-  let argumentarr = [];
-  if (shelfid) {
-    whereclause += " AND shelfid LIKE ?";
-    argumentarr.push('%'+shelfid.trim()+'%');
-  }
-  if (shelfname) {
-    whereclause += " AND shelfname LIKE ?";
-    argumentarr.push('%'+shelfname.trim()+'%');
-  }
-  if (descr) {
-    whereclause += " AND descr LIKE ?";
-    argumentarr.push('%'+descr.trim()+'%');
-  }
-  if (isData(store_id)) {
-    whereclause += " AND store_id IN (0,?)";
-    argumentarr.push(xNumber(store_id));
-  }
-  // Execute SQL
-  let RecordCount = 0;
+  let affectedRows = 0;
   try {
     const sql = `
-      SELECT COUNT(id) AS RecordCount
-        FROM shelfs
-        ${whereclause};
+      UPDATE exams
+        SET examcode = ?
+          , module_id = ?
+          , lesson_id = ?
+          , maxscore = ?
+          , examminute = ?
+          , title = ?
+          , caption = ?
+          , descr = ?
+          , coverid = ?
+          , maturityrating = ?
+          , tags = ?
+        WHERE id = ?;
     `;
-    const result = await dbconnect.execute(sql, argumentarr);
-    if (result.length > 0) {
-      RecordCount = xNumber(result[0].RecordCount);
+    const result = await dbconnect.execute(sql, [
+      examcode, 
+      module_id, 
+      lesson_id, 
+      maxscore, 
+      examminute, 
+      title, 
+      caption, 
+      descr, 
+      coverid, 
+      maturityrating, 
+      tags, 
+      id
+    ]); // OkPacket { affectedRows: 1, insertId: 0n, warningStatus: 0 }
+    if (result.affectedRows) {
+      affectedRows = xNumber(result.affectedRows);
     }
   } catch (err) {
-    console.log(incident(THIS_FILENAME+':count_shelfs', String(err)));
+    console.log(incident(THIS_FILENAME+':update_exam', String(err)));
     return K.SYS_INTERNAL_PROCESS_ERROR;
   }
-  return RecordCount;
+  return affectedRows;
 }
 
-async function count_goodservices(
-  goodsid: string, 
-  goodsname: string,
-  descr: string, 
-  goodstype_id: any,
-  unitcostfrom: any,
-  unitcostto: any,
-  remark: string
+async function update_quiz(
+  id: number,
+  exam_id: number,
+  quizno: number,
+  quizminute: number,
+  question: string,
+  contentid: string,
+  mediaid: string
 ) {
-  // Prepare SQL
-  let whereclause = " WHERE 1";
-  let argumentarr = [];
-  if (goodsid) {
-    whereclause += " AND goodsid LIKE ?";
-    argumentarr.push('%'+goodsid.trim()+'%');
-  }
-  if (goodsname) {
-    whereclause += " AND goodsname LIKE ?";
-    argumentarr.push('%'+goodsname.trim()+'%');
-  }
-  if (descr) {
-    whereclause += " AND descr LIKE ?";
-    argumentarr.push('%'+descr.trim()+'%');
-  }
-  if (goodstype_id) {
-    whereclause += " AND goodstype_id = ?";
-    argumentarr.push(goodstype_id);
-  }
-  if (isData(unitcostfrom)) {
-    whereclause += " AND unitcost >= ?";
-    argumentarr.push(xNumber(unitcostfrom));
-  }
-  if (isData(unitcostto)) {
-    whereclause += " AND unitcost <= ?";
-    argumentarr.push(xNumber(unitcostto));
-  }
-  if (remark) {
-    whereclause += " AND remark LIKE ?";
-    argumentarr.push('%'+remark.trim()+'%');
-  }
-  // Execute SQL
-  let RecordCount = 0;
+  let affectedRows = 0;
   try {
     const sql = `
-      SELECT COUNT(id) AS RecordCount
-        FROM goodservices
-        ${whereclause};
+      UPDATE quizzes
+        SET exam_id = ?
+          , quizno = ?
+          , quizminute = ?
+          , question = ?
+          , contentid = ?
+          , mediaid = ?
+        WHERE id = ?;
     `;
-    const result = await dbconnect.execute(sql, argumentarr);
-    if (result.length > 0) {
-      RecordCount = xNumber(result[0].RecordCount);
+    const result = await dbconnect.execute(sql, [
+      exam_id, 
+      quizno, 
+      quizminute, 
+      question, 
+      contentid, 
+      mediaid, 
+      id
+    ]); // OkPacket { affectedRows: 1, insertId: 0n, warningStatus: 0 }
+    if (result.affectedRows) {
+      affectedRows = xNumber(result.affectedRows);
     }
   } catch (err) {
-    console.log(incident(THIS_FILENAME+':count_goodservices', String(err)));
+    console.log(incident(THIS_FILENAME+':update_quiz', String(err)));
     return K.SYS_INTERNAL_PROCESS_ERROR;
   }
-  return RecordCount;
+  return affectedRows;
 }
 
-async function count_vendors(
+async function delete_module(id: number) {
+  let affectedRows = 0;
+  try {
+    const sql = `
+      DELETE FROM modules
+        WHERE id = ?;
+    `;
+    const result = await dbconnect.execute(sql, [
+      id
+    ]); // OkPacket { affectedRows: 1, insertId: 0n, warningStatus: 0 }
+    if (result.affectedRows) {
+      affectedRows = xNumber(result.affectedRows);
+    }
+  } catch (err) {
+    console.log(incident(THIS_FILENAME+':delete_module', String(err)));
+    return K.SYS_INTERNAL_PROCESS_ERROR;
+  }
+  return affectedRows;
+}
+
+async function delete_lesson(id: number) {
+  let affectedRows = 0;
+  try {
+    const sql = `
+      DELETE FROM lessons
+        WHERE id = ?;
+    `;
+    const result = await dbconnect.execute(sql, [
+      id
+    ]); // OkPacket { affectedRows: 1, insertId: 0n, warningStatus: 0 }
+    if (result.affectedRows) {
+      affectedRows = xNumber(result.affectedRows);
+    }
+  } catch (err) {
+    console.log(incident(THIS_FILENAME+':delete_lesson', String(err)));
+    return K.SYS_INTERNAL_PROCESS_ERROR;
+  }
+  return affectedRows;
+}
+
+async function delete_lessons(module_id: number) {
+  let affectedRows = 0;
+  try {
+    const sql = `
+      DELETE FROM lessons
+        WHERE module_id = ?;
+    `;
+    const result = await dbconnect.execute(sql, [
+      module_id
+    ]); // OkPacket { affectedRows: 1, insertId: 0n, warningStatus: 0 }
+    if (result.affectedRows) {
+      affectedRows = xNumber(result.affectedRows);
+    }
+  } catch (err) {
+    console.log(incident(THIS_FILENAME+':delete_lessons', String(err)));
+    return K.SYS_INTERNAL_PROCESS_ERROR;
+  }
+  return affectedRows;
+}
+
+async function delete_exam(id: number) {
+  let affectedRows = 0;
+  try {
+    const sql = `
+      DELETE FROM exams
+        WHERE id = ?;
+    `;
+    const result = await dbconnect.execute(sql, [
+      id
+    ]); // OkPacket { affectedRows: 1, insertId: 0n, warningStatus: 0 }
+    if (result.affectedRows) {
+      affectedRows = xNumber(result.affectedRows);
+    }
+  } catch (err) {
+    console.log(incident(THIS_FILENAME+':delete_exam', String(err)));
+    return K.SYS_INTERNAL_PROCESS_ERROR;
+  }
+  return affectedRows;
+}
+
+async function delete_quiz(id: number) {
+  let affectedRows = 0;
+  try {
+    const sql = `
+      DELETE FROM quizzes
+        WHERE id = ?;
+    `;
+    const result = await dbconnect.execute(sql, [
+      id
+    ]); // OkPacket { affectedRows: 1, insertId: 0n, warningStatus: 0 }
+    if (result.affectedRows) {
+      affectedRows = xNumber(result.affectedRows);
+    }
+  } catch (err) {
+    console.log(incident(THIS_FILENAME+':delete_quiz', String(err)));
+    return K.SYS_INTERNAL_PROCESS_ERROR;
+  }
+  return affectedRows;
+}
+
+async function delete_quizzes(exam_id: number) {
+  let affectedRows = 0;
+  try {
+    const sql = `
+      DELETE FROM quizzes
+        WHERE exam_id = ?;
+    `;
+    const result = await dbconnect.execute(sql, [
+      exam_id
+    ]); // OkPacket { affectedRows: 1, insertId: 0n, warningStatus: 0 }
+    if (result.affectedRows) {
+      affectedRows = xNumber(result.affectedRows);
+    }
+  } catch (err) {
+    console.log(incident(THIS_FILENAME+':delete_quizzes', String(err)));
+    return K.SYS_INTERNAL_PROCESS_ERROR;
+  }
+  return affectedRows;
+}
+
+async function delete_choices(quiz_id: number) {
+  let affectedRows = 0;
+  try {
+    const sql = `
+      DELETE FROM choices
+        WHERE quiz_id = ?;
+    `;
+    const result = await dbconnect.execute(sql, [
+      quiz_id
+    ]); // OkPacket { affectedRows: 1, insertId: 0n, warningStatus: 0 }
+    if (result.affectedRows) {
+      affectedRows = xNumber(result.affectedRows);
+    }
+  } catch (err) {
+    console.log(incident(THIS_FILENAME+':delete_choices', String(err)));
+    return K.SYS_INTERNAL_PROCESS_ERROR;
+  }
+  return affectedRows;
+}
+
+async function delete_choices_by_exam_id(exam_id: number) {
+  let affectedRows = 0;
+  try {
+    const sql = `
+      DELETE FROM choices
+        WHERE quiz_id IN (SELECT id FROM quizzes WHERE exam_id = ?);
+    `;
+    const result = await dbconnect.execute(sql, [
+      exam_id
+    ]); // OkPacket { affectedRows: 1, insertId: 0n, warningStatus: 0 }
+    if (result.affectedRows) {
+      affectedRows = xNumber(result.affectedRows);
+    }
+  } catch (err) {
+    console.log(incident(THIS_FILENAME+':delete_choices_by_exam_id', String(err)));
+    return K.SYS_INTERNAL_PROCESS_ERROR;
+  }
+  return affectedRows;
+}
+
+async function count_modules(
   belocked: any,
-  vendorid: string,
-  vendorname: string,
-  vendortype: string,
-  contact: string,
-  address1: string,
-  address2: string,
-  telno: string,
-  faxno: string,
-  taxcode: string,
-  remark: string
+  becancelled: any,
+  docstatus: any,
+  modulecode: string,
+  title: string,
+  caption: string,
+  descr: string,
+  maturityrating: any,
+  tags: any
 ) {
   // Prepare SQL
   let whereclause = " WHERE 1";
@@ -1694,52 +1127,54 @@ async function count_vendors(
     whereclause += " AND belocked = ?";
     argumentarr.push(xNumber(belocked));
   }
-  if (vendorid) {
-    whereclause += " AND vendorid LIKE ?";
-    argumentarr.push('%'+vendorid.trim()+'%');
+  if (isData(becancelled)) {
+    whereclause += " AND becancelled = ?";
+    argumentarr.push(xNumber(becancelled));
   }
-  if (vendorname) {
-    whereclause += " AND vendorname LIKE ?";
-    argumentarr.push('%'+vendorname.trim()+'%');
+  if (isData(docstatus)) {
+    whereclause += " AND docstatus = ?";
+    argumentarr.push(xNumber(docstatus));
   }
-  if (vendortype) {
-    whereclause += " AND vendortype = ?";
-    argumentarr.push(vendortype);
+  if (modulecode) {
+    whereclause += " AND modulecode LIKE ?";
+    argumentarr.push('%'+modulecode.trim()+'%');
   }
-  if (contact) {
-    whereclause += " AND contact LIKE ?";
-    argumentarr.push('%'+contact.trim()+'%');
+  if (title) {
+    whereclause += " AND title LIKE ?";
+    argumentarr.push('%'+title.trim()+'%');
   }
-  if (address1) {
-    whereclause += " AND address1 LIKE ?";
-    argumentarr.push('%'+address1.trim()+'%');
+  if (caption) {
+    whereclause += " AND caption LIKE ?";
+    argumentarr.push('%'+caption.trim()+'%');
   }
-  if (address2) {
-    whereclause += " AND address2 LIKE ?";
-    argumentarr.push('%'+address2.trim()+'%');
+  if (descr) {
+    whereclause += " AND descr LIKE ?";
+    argumentarr.push('%'+descr.trim()+'%');
   }
-  if (telno) {
-    whereclause += " AND telno LIKE ?";
-    argumentarr.push('%'+telno.trim()+'%');
+  if (isData(maturityrating)) {
+    whereclause += " AND maturityrating = ?";
+    argumentarr.push(xNumber(maturityrating));
   }
-  if (faxno) {
-    whereclause += " AND faxno LIKE ?";
-    argumentarr.push('%'+faxno.trim()+'%');
-  }
-  if (taxcode) {
-    whereclause += " AND taxcode LIKE ?";
-    argumentarr.push('%'+taxcode.trim()+'%');
-  }
-  if (remark) {
-    whereclause += " AND remark LIKE ?";
-    argumentarr.push('%'+remark.trim()+'%');
+  if (isData(tags)) {
+    const tagarr = toArray(tags);
+    if (tagarr.length > 0) {
+      whereclause += " AND (";
+      for (let i = 0; i < tagarr.length; i++) {
+        if (i > 0) {
+          whereclause += " OR";
+        }
+        whereclause += " LOWER(tags) LIKE LOWER(?)";
+        argumentarr.push('%"'+tagarr[i]+'"%');
+      }
+      whereclause += ")";
+    }
   }
   // Execute SQL
   let RecordCount = 0;
   try {
     const sql = `
       SELECT COUNT(id) AS RecordCount
-        FROM vendors
+        FROM modules
         ${whereclause};
     `;
     const result = await dbconnect.execute(sql, argumentarr);
@@ -1747,21 +1182,83 @@ async function count_vendors(
       RecordCount = xNumber(result[0].RecordCount);
     }
   } catch (err) {
-    console.log(incident(THIS_FILENAME+':count_vendors', String(err)));
+    console.log(incident(THIS_FILENAME+':count_modules', String(err)));
     return K.SYS_INTERNAL_PROCESS_ERROR;
   }
   return RecordCount;
 }
 
-async function count_boms(
-  belocked: any,
-  bomid: string, 
-  bomname: string,
+async function count_lessons(
+  module_id: number,
+  lessoncode: string,
+  title: string,
   descr: string,
-  goodservice_id: any, 
-  manhourfrom: any,
-  manhourto: any,
-  remark: string
+  tags: string
+) {
+  // Prepare SQL
+  let whereclause = " WHERE 1";
+  let argumentarr = [];
+  if (isData(module_id)) {
+    whereclause += " AND module_id = ?";
+    argumentarr.push(xNumber(module_id));
+  }
+  if (lessoncode) {
+    whereclause += " AND lessoncode LIKE ?";
+    argumentarr.push('%'+lessoncode.trim()+'%');
+  }
+  if (title) {
+    whereclause += " AND title LIKE ?";
+    argumentarr.push('%'+title.trim()+'%');
+  }
+  if (descr) {
+    whereclause += " AND descr LIKE ?";
+    argumentarr.push('%'+descr.trim()+'%');
+  }
+  if (isData(tags)) {
+    const tagarr = toArray(tags);
+    if (tagarr.length > 0) {
+      whereclause += " AND (";
+      for (let i = 0; i < tagarr.length; i++) {
+        if (i > 0) {
+          whereclause += " OR";
+        }
+        whereclause += " LOWER(tags) LIKE LOWER(?)";
+        argumentarr.push('%"'+tagarr[i]+'"%');
+      }
+      whereclause += ")";
+    }
+  }
+  // Execute SQL
+  let RecordCount = 0;
+  try {
+    const sql = `
+      SELECT COUNT(id) AS RecordCount
+        FROM lessons
+        ${whereclause};
+    `;
+    const result = await dbconnect.execute(sql, argumentarr);
+    if (result.length > 0) {
+      RecordCount = xNumber(result[0].RecordCount);
+    }
+  } catch (err) {
+    console.log(incident(THIS_FILENAME+':count_lessons', String(err)));
+    return K.SYS_INTERNAL_PROCESS_ERROR;
+  }
+  return RecordCount;
+}
+
+async function count_exams(
+  belocked: any,
+  becancelled: any,
+  docstatus: any,
+  examcode: string,
+  module_id: any,
+  lesson_id: any,
+  title: string,
+  caption: string,
+  descr: string,
+  maturityrating: any,
+  tags: any
 ) {
   // Prepare SQL
   let whereclause = " WHERE 1";
@@ -1770,109 +1267,62 @@ async function count_boms(
     whereclause += " AND belocked = ?";
     argumentarr.push(xNumber(belocked));
   }
-  if (bomid) {
-    whereclause += " AND bomid LIKE ?";
-    argumentarr.push('%'+bomid.trim()+'%');
+  if (isData(becancelled)) {
+    whereclause += " AND becancelled = ?";
+    argumentarr.push(xNumber(becancelled));
   }
-  if (bomname) {
-    whereclause += " AND bomname LIKE ?";
-    argumentarr.push('%'+bomname.trim()+'%');
+  if (isData(docstatus)) {
+    whereclause += " AND docstatus = ?";
+    argumentarr.push(xNumber(docstatus));
   }
-  if (descr) {
-    whereclause += " AND descr LIKE ?";
-    argumentarr.push('%'+descr.trim()+'%');
+  if (examcode) {
+    whereclause += " AND examcode LIKE ?";
+    argumentarr.push('%'+examcode.trim()+'%');
   }
-  if (isData(goodservice_id)) {
-    whereclause += " AND goodservice_id = ?";
-    argumentarr.push(xNumber(goodservice_id));
+  if (isData(module_id)) {
+    whereclause += " AND module_id = ?";
+    argumentarr.push(xNumber(module_id));
   }
-  if (isData(manhourfrom)) {
-    whereclause += " AND manhour >= ?";
-    argumentarr.push(xNumber(manhourfrom));
+  if (isData(lesson_id)) {
+    whereclause += " AND lesson_id = ?";
+    argumentarr.push(xNumber(lesson_id));
   }
-  if (isData(manhourto)) {
-    whereclause += " AND manhour <= ?";
-    argumentarr.push(xNumber(manhourto));
+  if (title) {
+    whereclause += " AND title LIKE ?";
+    argumentarr.push('%'+title.trim()+'%');
   }
-  if (remark) {
-    whereclause += " AND remark LIKE ?";
-    argumentarr.push('%'+remark.trim()+'%');
-  }
-  // Execute SQL
-  let RecordCount = 0;
-  try {
-    const sql = `
-      SELECT COUNT(id) AS RecordCount
-        FROM boms
-        ${whereclause};
-    `;
-    const result = await dbconnect.execute(sql, argumentarr);
-    if (result.length > 0) {
-      RecordCount = xNumber(result[0].RecordCount);
-    }
-  } catch (err) {
-    console.log(incident(THIS_FILENAME+':count_boms', String(err)));
-    return K.SYS_INTERNAL_PROCESS_ERROR;
-  }
-  return RecordCount;
-}
-
-async function count_recipes(
-  recipeid: string, 
-  recipename: string,
-  descr: string, 
-  bom_id: any,
-  docid: string,
-  docrevno: any,
-  refid: string,
-  writername: string,
-  remark: string
-) {
-  // Prepare SQL
-  let whereclause = " WHERE 1";
-  let argumentarr = [];
-  if (recipeid) {
-    whereclause += " AND recipeid LIKE ?";
-    argumentarr.push('%'+recipeid.trim()+'%');
-  }
-  if (recipename) {
-    whereclause += " AND recipename LIKE ?";
-    argumentarr.push('%'+recipename.trim()+'%');
+  if (caption) {
+    whereclause += " AND caption LIKE ?";
+    argumentarr.push('%'+caption.trim()+'%');
   }
   if (descr) {
     whereclause += " AND descr LIKE ?";
     argumentarr.push('%'+descr.trim()+'%');
   }
-  if (isData(bom_id)) {
-    whereclause += " AND bom_id = ?";
-    argumentarr.push(xNumber(bom_id));
+  if (isData(maturityrating)) {
+    whereclause += " AND maturityrating = ?";
+    argumentarr.push(xNumber(maturityrating));
   }
-  if (docid) {
-    whereclause += " AND docid LIKE ?";
-    argumentarr.push('%'+docid.trim()+'%');
-  }
-  if (isData(docrevno)) {
-    whereclause += " AND docrevno = ?";
-    argumentarr.push(xNumber(docrevno));
-  }
-  if (refid) {
-    whereclause += " AND refid LIKE ?";
-    argumentarr.push('%'+refid.trim()+'%');
-  }
-  if (writername) {
-    whereclause += " AND writername LIKE ?";
-    argumentarr.push('%'+writername.trim()+'%');
-  }
-  if (remark) {
-    whereclause += " AND remark LIKE ?";
-    argumentarr.push('%'+remark.trim()+'%');
+  if (isData(tags)) {
+    const tagarr = toArray(tags);
+    if (tagarr.length > 0) {
+      whereclause += " AND (";
+      for (let i = 0; i < tagarr.length; i++) {
+        if (i > 0) {
+          whereclause += " OR";
+        }
+        whereclause += " LOWER(tags) LIKE LOWER(?)";
+        argumentarr.push('%"'+tagarr[i]+'"%');
+      }
+      whereclause += ")";
+    }
   }
   // Execute SQL
   let RecordCount = 0;
   try {
     const sql = `
       SELECT COUNT(id) AS RecordCount
-        FROM recipes
+        FROM exams
         ${whereclause};
     `;
     const result = await dbconnect.execute(sql, argumentarr);
@@ -1880,33 +1330,48 @@ async function count_recipes(
       RecordCount = xNumber(result[0].RecordCount);
     }
   } catch (err) {
-    console.log(incident(THIS_FILENAME+':count_recipes', String(err)));
+    console.log(incident(THIS_FILENAME+':count_exams', String(err)));
     return K.SYS_INTERNAL_PROCESS_ERROR;
   }
   return RecordCount;
 }
 
-async function count_recipeitems(
-  recipe_id: number,
-  stepname: string
+async function count_quizzes(
+  belocked: any,
+  becancelled: any,
+  docstatus: any,
+  exam_id: any,
+  question: string
 ) {
   // Prepare SQL
   let whereclause = " WHERE 1";
   let argumentarr = [];
-  if (isData(recipe_id)) {
-    whereclause += " AND recipe_id = ?";
-    argumentarr.push(xNumber(recipe_id));
+  if (isData(belocked)) {
+    whereclause += " AND belocked = ?";
+    argumentarr.push(xNumber(belocked));
   }
-  if (stepname) {
-    whereclause += " AND stepname LIKE ?";
-    argumentarr.push('%'+stepname.trim()+'%');
+  if (isData(becancelled)) {
+    whereclause += " AND becancelled = ?";
+    argumentarr.push(xNumber(becancelled));
+  }
+  if (isData(docstatus)) {
+    whereclause += " AND docstatus = ?";
+    argumentarr.push(xNumber(docstatus));
+  }
+  if (isData(exam_id)) {
+    whereclause += " AND exam_id = ?";
+    argumentarr.push(xNumber(exam_id));
+  }
+  if (question) {
+    whereclause += " AND question LIKE ?";
+    argumentarr.push('%'+question.trim()+'%');
   }
   // Execute SQL
   let RecordCount = 0;
   try {
     const sql = `
       SELECT COUNT(id) AS RecordCount
-        FROM recipeitems
+        FROM quizzes
         ${whereclause};
     `;
     const result = await dbconnect.execute(sql, argumentarr);
@@ -1914,61 +1379,44 @@ async function count_recipeitems(
       RecordCount = xNumber(result[0].RecordCount);
     }
   } catch (err) {
-    console.log(incident(THIS_FILENAME+':count_recipeitems', String(err)));
+    console.log(incident(THIS_FILENAME+':count_quizzes', String(err)));
     return K.SYS_INTERNAL_PROCESS_ERROR;
   }
   return RecordCount;
 }
 
 export {
-  add_shelf,
-  add_goodservice,
-  add_station,
-  add_vendor,
-  add_bom,
-  add_bomitem,
-  add_recipe,
-  add_recipeitem,
+  add_module,
+  add_lesson,
+  add_exam,
+  add_quiz,
+  add_choice,
   get_sysvar,
   get_sysvars,
-  get_stores,
-  get_shelf,
-  get_shelfs,
-  get_goodstypes,
-  get_goodservice,
-  get_goodservices,
-  get_station,
-  get_stations,
-  get_vendor,
-  get_vendors,
-  get_bom,
-  get_boms,
-  get_bomitems,
-  get_recipe,
-  get_recipes,
-  get_recipeitem,
-  get_recipeitems,
+  get_module,
+  get_modules,
+  get_lesson,
+  get_lessons,
+  get_exam,
+  get_exams,
+  get_quiz,
+  get_quizzes,
+  get_choices,
   update_sysvar,
-  update_shelf,
-  update_goodservice,
-  update_station,
-  update_vendor,
-  update_bom,
-  update_recipe,
-  update_recipeitem,
-  delete_shelf,
-  delete_goodservice,
-  delete_station,
-  delete_vendor,
-  delete_bom,
-  delete_bomitems,
-  delete_recipe,
-  delete_recipeitem,
-  delete_recipeitems,
-  count_shelfs,
-  count_goodservices,
-  count_vendors,
-  count_boms,
-  count_recipes,
-  count_recipeitems
+  update_module,
+  update_lesson,
+  update_exam,
+  update_quiz,
+  delete_module,
+  delete_lesson,
+  delete_lessons,
+  delete_exam,
+  delete_quiz,
+  delete_quizzes,
+  delete_choices,
+  delete_choices_by_exam_id,
+  count_modules,
+  count_lessons,
+  count_exams,
+  count_quizzes
 }

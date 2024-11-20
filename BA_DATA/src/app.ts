@@ -32,10 +32,12 @@ import log_user from './routes/log_user';
 import user from './routes/user';
 import bucket from './routes/bucket';
 import content from './routes/content';
+import module from './routes/module';
+import exam from './routes/exam';
 
 //################################# DECLARATION #################################
 const app: Express = express();
-const appver: string = 'v1.0.20241111';
+const appver: string = 'v1.0.20241120';
 const port: number = 57102;
 // const port: number = 80;
 const corsOptions: cors.CorsOptions = {
@@ -81,6 +83,8 @@ app.use('/log_user', log_user);
 app.use('/user', user);
 app.use('/bucket', bucket);
 app.use('/content', content);
+app.use('/module', module);
+app.use('/exam', exam);
 
 /* Test Group */
 // app.use('/test', test);
