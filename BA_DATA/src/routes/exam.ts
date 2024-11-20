@@ -170,7 +170,7 @@ router.post('/quiz', async (req: Request, res: Response) => {
     if (!(isData(choice.answer) && isData(choice.becorrect))) {
       sendObj(3, 'Insufficient required fields', [{
         RowNo: rowno,
-    }], res);
+      }], res);
       return;
     }
   }
@@ -613,7 +613,7 @@ router.put('/quiz/id/:id', async (req: Request, res: Response) => {
     if (!(isData(choice.answer) && isData(choice.becorrect))) {
       sendObj(3, 'Insufficient required fields', [{
         RowNo: rowno,
-    }], res);
+      }], res);
       return;
     }
   }
