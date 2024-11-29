@@ -1418,5 +1418,5 @@ export {
   count_modules,
   count_lessons,
   count_exams,
-  count_quizzes
+  count_quizzes,
 }

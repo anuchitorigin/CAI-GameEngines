@@ -9,14 +9,14 @@ services:
   #   depends_on:
   #     - ba_main
   #     - ba_auth
-  # ba_main:
-  #   image: anuchitorigin/caige-ba_main:latest
-  #   command: npm start
-  #   restart: always
-  #   ports:
-  #     - ${BA_MAIN_PORT}:${BA_MAIN_PORT}
-  #   depends_on:
-  #     - db
+  ba_main:
+    image: anuchitorigin/caige-ba_main:latest
+    command: npm start
+    restart: always
+    ports:
+      - ${BA_MAIN_PORT}:${BA_MAIN_PORT}
+    depends_on:
+      - db
   ba_auth:
     image: anuchitorigin/caige-ba_auth:latest
     command: npm start

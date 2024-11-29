@@ -530,32 +530,32 @@ CREATE DATABASE /*!32312 IF NOT EXISTS*/ `caige_oper` /*!40100 DEFAULT CHARACTER
 USE `caige_oper`;
 
 --
--- Table structure for table `takenexams`
+-- Table structure for table `assessments`
 --
 
-DROP TABLE IF EXISTS `takenexams`;
+DROP TABLE IF EXISTS `assessments`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `takenexams` (
+CREATE TABLE `assessments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT NULL ON UPDATE current_timestamp(),
   `finished_at` datetime DEFAULT NULL,
   `userid` varchar(40) NOT NULL,
   `examid` varchar(40) NOT NULL,
-  `finishscore` int(11) NOT NULL,
-  `finishminute` int(11) NOT NULL,
+  `finishscore` int(11) NOT NULL DEFAULT 0,
+  `finishminute` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `takenexams`
+-- Dumping data for table `assessments`
 --
 
-LOCK TABLES `takenexams` WRITE;
-/*!40000 ALTER TABLE `takenexams` DISABLE KEYS */;
-/*!40000 ALTER TABLE `takenexams` ENABLE KEYS */;
+LOCK TABLES `assessments` WRITE;
+/*!40000 ALTER TABLE `assessments` DISABLE KEYS */;
+/*!40000 ALTER TABLE `assessments` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -2261,8 +2261,8 @@ CREATE TABLE `proc` (
 LOCK TABLES `proc` WRITE;
 /*!40000 ALTER TABLE `proc` DISABLE KEYS */;
 INSERT INTO `proc` VALUES
-('mysql','AddGeometryColumn','PROCEDURE','AddGeometryColumn','SQL','CONTAINS_SQL','NO','INVOKER','catalog varchar(64), t_schema varchar(64),\n   t_name varchar(64), geometry_column varchar(64), t_srid int','','begin\n  set @qwe= concat(\'ALTER TABLE \', t_schema, \'.\', t_name, \' ADD \', geometry_column,\' GEOMETRY REF_SYSTEM_ID=\', t_srid); PREPARE ls from @qwe; execute ls; deallocate prepare ls; end','mariadb.sys@localhost','2024-11-20 11:41:26','2024-11-20 11:41:26','','','utf8mb3','utf8mb3_general_ci','utf8mb4_uca1400_ai_ci','begin\n  set @qwe= concat(\'ALTER TABLE \', t_schema, \'.\', t_name, \' ADD \', geometry_column,\' GEOMETRY REF_SYSTEM_ID=\', t_srid); PREPARE ls from @qwe; execute ls; deallocate prepare ls; end','NONE'),
-('mysql','DropGeometryColumn','PROCEDURE','DropGeometryColumn','SQL','CONTAINS_SQL','NO','INVOKER','catalog varchar(64), t_schema varchar(64),\n   t_name varchar(64), geometry_column varchar(64)','','begin\n  set @qwe= concat(\'ALTER TABLE \', t_schema, \'.\', t_name, \' DROP \', geometry_column); PREPARE ls from @qwe; execute ls; deallocate prepare ls; end','mariadb.sys@localhost','2024-11-20 11:41:26','2024-11-20 11:41:26','','','utf8mb3','utf8mb3_general_ci','utf8mb4_uca1400_ai_ci','begin\n  set @qwe= concat(\'ALTER TABLE \', t_schema, \'.\', t_name, \' DROP \', geometry_column); PREPARE ls from @qwe; execute ls; deallocate prepare ls; end','NONE'),
+('mysql','AddGeometryColumn','PROCEDURE','AddGeometryColumn','SQL','CONTAINS_SQL','NO','INVOKER','catalog varchar(64), t_schema varchar(64),\n   t_name varchar(64), geometry_column varchar(64), t_srid int','','begin\n  set @qwe= concat(\'ALTER TABLE \', t_schema, \'.\', t_name, \' ADD \', geometry_column,\' GEOMETRY REF_SYSTEM_ID=\', t_srid); PREPARE ls from @qwe; execute ls; deallocate prepare ls; end','mariadb.sys@localhost','2024-11-29 11:08:54','2024-11-29 11:08:54','','','utf8mb3','utf8mb3_general_ci','utf8mb4_uca1400_ai_ci','begin\n  set @qwe= concat(\'ALTER TABLE \', t_schema, \'.\', t_name, \' ADD \', geometry_column,\' GEOMETRY REF_SYSTEM_ID=\', t_srid); PREPARE ls from @qwe; execute ls; deallocate prepare ls; end','NONE'),
+('mysql','DropGeometryColumn','PROCEDURE','DropGeometryColumn','SQL','CONTAINS_SQL','NO','INVOKER','catalog varchar(64), t_schema varchar(64),\n   t_name varchar(64), geometry_column varchar(64)','','begin\n  set @qwe= concat(\'ALTER TABLE \', t_schema, \'.\', t_name, \' DROP \', geometry_column); PREPARE ls from @qwe; execute ls; deallocate prepare ls; end','mariadb.sys@localhost','2024-11-29 11:08:54','2024-11-29 11:08:54','','','utf8mb3','utf8mb3_general_ci','utf8mb4_uca1400_ai_ci','begin\n  set @qwe= concat(\'ALTER TABLE \', t_schema, \'.\', t_name, \' DROP \', geometry_column); PREPARE ls from @qwe; execute ls; deallocate prepare ls; end','NONE'),
 ('sys','extract_schema_from_file_name','FUNCTION','extract_schema_from_file_name','SQL','NO_SQL','YES','INVOKER','path VARCHAR(512)\n    ','varchar(64) CHARSET utf8mb3 COLLATE utf8mb3_general_ci','BEGIN\n    RETURN LEFT(SUBSTRING_INDEX(SUBSTRING_INDEX(REPLACE(path, \'\\\\\', \'/\'), \'/\', -2), \'/\', 1), 64);\nEND','mariadb.sys@localhost','2024-11-11 05:18:41','2024-11-11 05:18:41','','\n             Description\n             Takes a raw file path, and attempts to extract the schema name from it.\n             Useful for when interacting with Performance Schema data\n             concerning IO statistics, for example.\n             Currently relies on the fact that a table data file will be within a\n             specified database directory (will not work with partitions or tables\n             that specify an individual DATA_DIRECTORY).\n             Parameters\n             path (VARCHAR(512)):\n               The full file path to a data file to extract the schema name from.\n             Returns\n             VARCHAR(64)\n             Example\n             mysql> SELECT sys.extract_schema_from_file_name(\'/var/lib/mysql/employees/employee.ibd\');\n             +----------------------------------------------------------------------------+\n             | sys.extract_schema_from_file_name(\'/var/lib/mysql/employees/employee.ibd\') |\n             +----------------------------------------------------------------------------+\n             | employees                                                                  |\n             +----------------------------------------------------------------------------+\n             1 row in set (0.00 sec)\n            ','utf8mb3','utf8mb3_general_ci','utf8mb3_general_ci','BEGIN\n    RETURN LEFT(SUBSTRING_INDEX(SUBSTRING_INDEX(REPLACE(path, \'\\\', \'/\'), \'/\', -2), \'/\', 1), 64);\nEND','NONE'),
 ('sys','extract_table_from_file_name','FUNCTION','extract_table_from_file_name','SQL','NO_SQL','YES','INVOKER','path VARCHAR(512)\n    ','varchar(64) CHARSET utf8mb3 COLLATE utf8mb3_general_ci','BEGIN\n    RETURN LEFT(SUBSTRING_INDEX(REPLACE(SUBSTRING_INDEX(REPLACE(path, \'\\\\\', \'/\'), \'/\', -1), \'@0024\', \'$\'), \'.\', 1), 64);\nEND','mariadb.sys@localhost','2024-11-11 05:18:41','2024-11-11 05:18:41','','\n             Description\n             Takes a raw file path, and extracts the table name from it.\n             Useful for when interacting with Performance Schema data\n             concerning IO statistics, for example.\n             Parameters\n             path (VARCHAR(512)):\n               The full file path to a data file to extract the table name from.\n             Returns\n             VARCHAR(64)\n             Example\n             mysql> SELECT sys.extract_table_from_file_name(\'/var/lib/mysql/employees/employee.ibd\');\n             +---------------------------------------------------------------------------+\n             | sys.extract_table_from_file_name(\'/var/lib/mysql/employees/employee.ibd\') |\n             +---------------------------------------------------------------------------+\n             | employee                                                                  |\n             +---------------------------------------------------------------------------+\n             1 row in set (0.02 sec)\n            ','utf8mb3','utf8mb3_general_ci','utf8mb3_general_ci','BEGIN\n    RETURN LEFT(SUBSTRING_INDEX(REPLACE(SUBSTRING_INDEX(REPLACE(path, \'\\\', \'/\'), \'/\', -1), \'@0024\', \'$\'), \'.\', 1), 64);\nEND','NONE'),
 ('sys','format_bytes','FUNCTION','format_bytes','SQL','NO_SQL','YES','INVOKER','bytes TEXT\n    ','text CHARSET utf8mb3 COLLATE utf8mb3_general_ci','BEGIN\n  IF bytes IS NULL THEN RETURN NULL;\n  ELSEIF bytes >= 1125899906842624 THEN RETURN CONCAT(ROUND(bytes / 1125899906842624, 2), \' PiB\');\n  ELSEIF bytes >= 1099511627776 THEN RETURN CONCAT(ROUND(bytes / 1099511627776, 2), \' TiB\');\n  ELSEIF bytes >= 1073741824 THEN RETURN CONCAT(ROUND(bytes / 1073741824, 2), \' GiB\');\n  ELSEIF bytes >= 1048576 THEN RETURN CONCAT(ROUND(bytes / 1048576, 2), \' MiB\');\n  ELSEIF bytes >= 1024 THEN RETURN CONCAT(ROUND(bytes / 1024, 2), \' KiB\');\n  ELSE RETURN CONCAT(ROUND(bytes, 0), \' bytes\');\n  END IF;\nEND','mariadb.sys@localhost','2024-11-11 05:18:41','2024-11-11 05:18:41','','\n             Description\n             Takes a raw bytes value, and converts it to a human readable format.\n             Parameters\n             bytes (TEXT):\n               A raw bytes value.\n             Returns\n             TEXT\n             Example\n             mysql> SELECT sys.format_bytes(2348723492723746) AS size;\n             +----------+\n             | size     |\n             +----------+\n             | 2.09 PiB |\n             +----------+\n             1 row in set (0.00 sec)\n             mysql> SELECT sys.format_bytes(2348723492723) AS size;\n             +----------+\n             | size     |\n             +----------+\n             | 2.14 TiB |\n             +----------+\n             1 row in set (0.00 sec)\n             mysql> SELECT sys.format_bytes(23487234) AS size;\n             +-----------+\n             | size      |\n             +-----------+\n             | 22.40 MiB |\n             +-----------+\n             1 row in set (0.00 sec)\n            ','utf8mb3','utf8mb3_general_ci','utf8mb3_general_ci','BEGIN\n  IF bytes IS NULL THEN RETURN NULL;\n  ELSEIF bytes >= 1125899906842624 THEN RETURN CONCAT(ROUND(bytes / 1125899906842624, 2), \' PiB\');\n  ELSEIF bytes >= 1099511627776 THEN RETURN CONCAT(ROUND(bytes / 1099511627776, 2), \' TiB\');\n  ELSEIF bytes >= 1073741824 THEN RETURN CONCAT(ROUND(bytes / 1073741824, 2), \' GiB\');\n  ELSEIF bytes >= 1048576 THEN RETURN CONCAT(ROUND(bytes / 1048576, 2), \' MiB\');\n  ELSEIF bytes >= 1024 THEN RETURN CONCAT(ROUND(bytes / 1024, 2), \' KiB\');\n  ELSE RETURN CONCAT(ROUND(bytes, 0), \' bytes\');\n  END IF;\nEND','NONE'),
@@ -37812,4 +37812,4 @@ USE `mysql`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2024-11-20 11:42:30
+-- Dump completed on 2024-11-29 11:09:19
