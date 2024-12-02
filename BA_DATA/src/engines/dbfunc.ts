@@ -716,6 +716,7 @@ async function get_choices(quiz_id: number) {
         , quiz_id, answer, choiceno, choicescore, becorrect
         , mediaid, feedbackid
         FROM choices
+        WHERE quiz_id = ?
         ORDER BY choiceno, id;
     `;
     const result = await dbconnect.execute(sql, [
