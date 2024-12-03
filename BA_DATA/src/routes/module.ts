@@ -564,7 +564,7 @@ router.delete('/id/:id', async (req: Request, res: Response) => {
 });
 
 /* define the Delete-Lesson-One route */
-router.delete('/item/id/:id', async (req: Request, res: Response) => {
+router.delete('/lesson/id/:id', async (req: Request, res: Response) => {
   /**
    *  Response:-
    *    {

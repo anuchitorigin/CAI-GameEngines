@@ -37,7 +37,7 @@ import exam from './routes/exam';
 
 //################################# DECLARATION #################################
 const app: Express = express();
-const appver: string = 'v1.0.20241202';
+const appver: string = 'v1.0.20241203';
 const port: number = 57102;
 // const port: number = 80;
 const corsOptions: cors.CorsOptions = {
