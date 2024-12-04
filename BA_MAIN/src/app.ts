@@ -30,7 +30,7 @@ import assessment from './routes/assessment';
 
 //################################# DECLARATION #################################
 const app: Express = express();
-const appver: string = 'v1.0.20241129';
+const appver: string = 'v1.0.20241204';
 const port: number = 57100;
 // const port: number = 80;
 const corsOptions: cors.CorsOptions = {

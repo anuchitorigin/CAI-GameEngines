@@ -116,6 +116,7 @@ router.post('/', async (req: Request, res: Response) => {
       return;
     }
   }
+  exams[0].assessment_id = id;
   exams[0].quizzes = quizzes;
   // -- Event Log
   const logdetail = JSON.stringify({
@@ -284,7 +285,7 @@ router.put('/id/:id', async (req: Request, res: Response) => {
     }
     const quiz_id = xNumber(quiz.id);
     const choice_id = xNumber(quiz.choice_id);
-    const choices = await check_choice(quiz_id, choice_id);
+    const choices = await check_choice(examid, quiz_id, choice_id);
     if (choices == K.SYS_INTERNAL_PROCESS_ERROR) {
       sendObj(2, 'Internal process error', [], res);
       return;
@@ -320,6 +321,7 @@ router.post('/check/choice', async (req: Request, res: Response) => {
   /**
    *  Request:-
    *    {
+   *      examid: string,
    *      quiz_id: number,
    *      choice_id: number
    *    }
@@ -331,15 +333,17 @@ router.post('/check/choice', async (req: Request, res: Response) => {
    *    }
    */
   const userid = xString(res.locals.userid);
+  let examid = req.body.examid;
   let quiz_id = req.body.quiz_id;
   let choice_id = req.body.choice_id;
   if (!(isData(quiz_id) && isData(choice_id))) {
     sendObj(3, 'Insufficient required fields', [], res);
     return;
   }
+  examid = xString(examid);
   quiz_id = xNumber(quiz_id);
   choice_id = xNumber(choice_id);
-  const choices = await check_choice(quiz_id, choice_id);
+  const choices = await check_choice(examid, quiz_id, choice_id);
   if (choices == K.SYS_INTERNAL_PROCESS_ERROR) {
     sendObj(2, 'Internal process error', [], res);
     return;

@@ -322,18 +322,26 @@ async function start_choices(quiz_id: number) {
   return records;
 }
 
-async function check_choice(quiz_id: number, choice_id: number) {
+async function check_choice(
+  examid: string,
+  quiz_id: number, 
+  choice_id: number
+) {
   let records = [];
   try {
     const sql = `
-      SELECT id, choicescore, becorrect, feedbackid
-        FROM ${SCHEMA_DATA}.choices
-        WHERE id = ?
-          AND quiz_id = ?;
+      SELECT c.id, c.choicescore, c.becorrect, c.feedbackid
+        FROM ${SCHEMA_DATA}.choices c
+        INNER JOIN ${SCHEMA_DATA}.quizzes q ON q.id = c.quiz_id
+        INNER JOIN ${SCHEMA_DATA}.exams e ON e.id = q.exam_id
+        WHERE c.id = ?
+          AND c.quiz_id = ?
+          AND e.examid = ?;
     `;
     const result = await dbconnect.execute(sql, [
       choice_id,
-      quiz_id
+      quiz_id,
+      examid
     ]);
     if (result.length > 0) {
       records = result;
