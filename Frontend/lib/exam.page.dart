@@ -40,7 +40,6 @@ class _ExamPageState extends State<ExamPage> {
   bool isFinish = false;
 
   final Quill.QuillController _quizContentController = Quill.QuillController.basic();
-  final Quill.QuillController _choiceContentController = Quill.QuillController.basic();
 
   int quizIndex = -1;
 
@@ -67,7 +66,6 @@ class _ExamPageState extends State<ExamPage> {
     final LoadingDialogService loading = LoadingDialogService();
 
     _quizContentController.readOnly = true;
-    _choiceContentController.readOnly = true;
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       loading.presentLoading(context);
@@ -101,7 +99,6 @@ class _ExamPageState extends State<ExamPage> {
       final ModuleAPI moduleAPI = ModuleAPI();
 
       APIResult resModuleCount = await moduleAPI.readCount(loginSession.token, null, null, null, null, null, null, null, null, []);
-
       if(resModuleCount.status == 1 && (resModuleCount.result[0] as RecordCountModel).RecordCount > 0) {
         int i = 0;
         do {
@@ -121,7 +118,7 @@ class _ExamPageState extends State<ExamPage> {
   }
 
   loadExam() async {
-    if(loginSession.token.isNotEmpty) {
+    if(loginSession.token.isNotEmpty && module != null) {
       final AssessmentAPI assessmentAPI = AssessmentAPI();
 
       try {
@@ -158,6 +155,11 @@ class _ExamPageState extends State<ExamPage> {
           isLoading = false;
         });
       }
+    } else {
+      setState(() {
+        noModuleOrExam = true;
+        isLoading = false;
+      });
     }
   }
 
@@ -205,12 +207,11 @@ class _ExamPageState extends State<ExamPage> {
           child: Builder(
             builder: (BuildContext context) {
               if(noModuleOrExam) {
-                return Column(
+                return const Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Text('ไม่พบโมดูลหรือแบบทดสอบในระบบ', style: TextStyle(fontSize: 36),),
-                    Text(module!.title, style: const TextStyle(fontSize: 40),),
+                    Text('ไม่พบโมดูลหรือแบบทดสอบในระบบ', style: TextStyle(fontSize: 36),),
                   ],
                 );
               } else if(isFinish) {
