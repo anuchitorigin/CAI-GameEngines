@@ -28,18 +28,6 @@ import 'package:cai_gameengine/models/assessment.model.dart';
 import 'package:cai_gameengine/models/bucket.model.dart';
 import 'package:cai_gameengine/models/content.model.dart';
 
-class CreateUpdateOneState extends CreateUpdateOne {
-  bool becorrect;
-  Uint8List feedback;
-
-  CreateUpdateOneState({
-    required super.id,
-    required super.choice_id,
-    required this.becorrect,
-    required this.feedback
-  });
-}
-
 class ExamPage extends StatefulWidget {
   const ExamPage({super.key});
 
@@ -53,14 +41,13 @@ class _ExamPageState extends State<ExamPage> {
 
   final Quill.QuillController _quizContentController = Quill.QuillController.basic();
   final Quill.QuillController _choiceContentController = Quill.QuillController.basic();
-  final Quill.QuillController _feedbackContentController = Quill.QuillController.basic();
 
   int quizIndex = -1;
 
   int examTime = 0;
   Timer? examTimer;
 
-  List<CreateUpdateOneState> quizChoiceList = [];
+  List<CreateUpdateOne> quizChoiceList = [];
 
   ModuleModel? module;
   CreateAssessmentResult? assessment;
@@ -150,11 +137,9 @@ class _ExamPageState extends State<ExamPage> {
             final int length = assessment!.quizzes.length;
             for(int i = 0; i < length; i++) {
               quizChoiceList.add(
-                CreateUpdateOneState(
+                CreateUpdateOne(
                   id: assessment!.quizzes[i].id,
-                  choice_id: 0,
-                  becorrect: false,
-                  feedback: Uint8List(0)
+                  choice_id: 0
                 )
               );
             }
@@ -250,8 +235,6 @@ class _ExamPageState extends State<ExamPage> {
 
                         for(var quizChoice in quizChoiceList) {
                           quizChoice.choice_id = 0;
-                          quizChoice.becorrect = false;
-                          quizChoice.feedback = Uint8List(0);
                         }
 
                         setState(() {
@@ -529,9 +512,10 @@ class _ExamPageState extends State<ExamPage> {
                                     Radio<QuizChoice>(
                                       value: currentQuiz.choices[index],
                                       groupValue: choiceSelection,
-                                      onChanged: choiceSelection != null && quizChoiceList.firstWhere((e) => e.id == currentQuiz.id).choice_id == choiceSelection!.id ? null : (QuizChoice? value) async {
+                                      onChanged: (QuizChoice? value) async {
                                         setState(() {
                                           choiceSelection = value;
+                                          quizChoiceList.firstWhere((e) => e.id == currentQuiz.id).choice_id = choiceSelection!.id;
                                         });
                                       },
                                     ),
@@ -583,18 +567,6 @@ class _ExamPageState extends State<ExamPage> {
                                       }
                                     ),
                                     Text(currentQuiz.choices[index].answer, style: TextStyle(fontSize: 16, color: colorScheme.onSurface,),),
-                                    Visibility(
-                                      visible: choiceSelection != null && quizChoiceList.firstWhere((e) => e.id == currentQuiz.id).choice_id == currentQuiz.choices[index].id,
-                                      child: const SizedBox(
-                                        width: 10,
-                                      ),
-                                    ),
-                                    Visibility(
-                                      visible: choiceSelection != null && quizChoiceList.firstWhere((e) => e.id == currentQuiz.id).choice_id == currentQuiz.choices[index].id,
-                                      child: quizChoiceList.firstWhere((e) => e.id == currentQuiz.id).becorrect ?
-                                        Icon(Icons.check, size: 32, color: colorScheme.brightness == Brightness.light ? const Color( 0xFF009000 ) : const Color( 0xFF0FF000 ),) :
-                                        const Icon(Icons.close, size: 32, color: Color(0xFFFF0000),),
-                                    ),
                                   ],
                                 ),
                                 const SizedBox(
@@ -603,33 +575,6 @@ class _ExamPageState extends State<ExamPage> {
                               ],
                             );
                           }
-                        ),
-                        Visibility(
-                          visible: choiceSelection != null && quizChoiceList.firstWhere((e) => e.id == currentQuiz.id).choice_id == choiceSelection!.id && quizChoiceList.firstWhere((e) => e.id == currentQuiz.id).feedback.isNotEmpty,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 5.0,),
-                            child: Container(
-                              padding: const EdgeInsets.all(10),
-                              width: double.maxFinite,
-                              height: 400.0,
-                              decoration: BoxDecoration(
-                                border: Border.all(width: 3.0, color: colorScheme.onSurface,),
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Quill.QuillEditor.basic(
-                                      controller: _feedbackContentController,
-                                      configurations: const Quill.QuillEditorConfigurations(),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
                         ),
                       ],
                     ),
@@ -741,68 +686,7 @@ class _ExamPageState extends State<ExamPage> {
                 ),
               ),
               Visibility(
-                visible: quizIndex > 0,
-                child: const SizedBox(
-                  width: 50.0,
-                ),
-              ),
-              ElevatedButton(
-                onPressed: choiceSelection == null || quizChoiceList.firstWhere((e) => e.id == currentQuiz.id).choice_id == choiceSelection!.id ? null : () async {
-                  final LoadingDialogService loading = LoadingDialogService();
-                  loading.presentLoading(context);
-
-                  final AssessmentAPI assessmentAPI = AssessmentAPI();
-                  APIResult resCheckChoice = await assessmentAPI.checkChoice(loginSession.token, assessment!.examid, assessment!.quizzes[quizIndex].id, choiceSelection!.id);
-                  if(resCheckChoice.status == 1) {
-                    final CheckChoiceModel checkchoice = resCheckChoice.result[0] as CheckChoiceModel;
-
-                    final ContentAPI contentAPI = ContentAPI();
-                    APIResult resFeedback = await contentAPI.readOne(loginSession.token, checkchoice.feedbackid);
-
-                    if(resFeedback.status == 1) {
-                      final ContentModel feedback = resFeedback.result[0] as ContentModel;
-
-                      // ignore: use_build_context_synchronously
-                      context.pop();
-
-                      examTimer?.cancel();
-                      examTimer = null;
-
-                      await showFeedbackDialog(checkchoice.becorrect, feedback.bucketdata.data);
-
-                      CreateUpdateOneState quizChoice = quizChoiceList.firstWhere((e) => e.id == currentQuiz.id);
-                      quizChoice.choice_id = choiceSelection!.id;
-                      quizChoice.becorrect = checkchoice.becorrect;
-                      quizChoice.feedback = feedback.bucketdata.data;
-
-                      if(quizChoice.feedback.isNotEmpty) {
-                        _feedbackContentController.document = Quill.Document.fromJson(jsonDecode(utf8.decode(quizChoice.feedback)));
-                      } else {
-                        _feedbackContentController.document = Quill.Document();
-                      }
-
-                      if(examTime > 0) {
-                        examTimer = Timer.periodic(const Duration(seconds: 1), timerCallback);
-                      }
-                    }
-                  }
-
-                  setState(() {});
-                },
-                style: ElevatedButton.styleFrom(
-                  maximumSize: const Size.fromWidth(140),
-                  padding: const EdgeInsets.all(15),
-                  backgroundColor: colorScheme.tertiary,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('ยืนยันคำตอบ', style: TextStyle(fontSize: 16, color: colorScheme.onTertiary,),),
-                  ],
-                ),
-              ),
-              Visibility(
-                visible: quizIndex < assessment!.quizzes.length - 1,
+                visible: (quizIndex > 0) && (quizIndex < assessment!.quizzes.length - 1),
                 child: const SizedBox(
                   width: 50.0,
                 ),
@@ -998,101 +882,6 @@ class _ExamPageState extends State<ExamPage> {
 
       return false;
     }
-  }
-
-  showFeedbackDialog(bool becorrect, Uint8List data) async {
-    if(data.isNotEmpty) {
-      _choiceContentController.document = Quill.Document.fromJson(jsonDecode(utf8.decode(data)));
-    }
-
-    await showDialog<bool>(
-      barrierDismissible: false,
-      context: context,
-      builder: (BuildContext context) {
-        return LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
-            globalConstraints = constraints;
-            
-            final isLg = constraints.maxWidth > 992;
-            final isMd = constraints.maxWidth > 768;
-            final isSm = constraints.maxWidth > 576;
-
-            final dialogWidth = isLg ? constraints.maxWidth * 0.4 : (isMd ? constraints.maxWidth * 0.5 : (isSm ? constraints.maxWidth * 0.8 : constraints.maxWidth * 0.9));
-
-            return Dialog(
-              child: Padding(
-                padding: const EdgeInsets.all(15),
-                child: SizedBox(
-                  width: dialogWidth,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          becorrect ?
-                            Icon(Icons.check, size: 32, color: colorScheme.brightness == Brightness.light ? const Color( 0xFF009000 ) : const Color( 0xFF0FF000 ),) :
-                            const Icon(Icons.close, size: 32, color: Color(0xFFFF0000),),
-                          Text(becorrect ? ' ตอบถูก' : ' ตอบผิด', style: TextStyle(fontSize: 36, color: colorScheme.onSurface,),),
-                        ],
-                      ),
-                      Visibility(
-                        visible: data.isNotEmpty,
-                        child: Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            border: Border.all(width: 3.0, color: colorScheme.onSurface,),
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                          child: SingleChildScrollView(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Quill.QuillEditor.basic(
-                                  controller: _choiceContentController,
-                                  configurations: const Quill.QuillEditorConfigurations(),
-                                )
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 10.0,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: colorScheme.secondary,
-                              padding: const EdgeInsets.fromLTRB(25, 15, 25, 15),
-                            ),
-                            onPressed: () {
-                              context.pop();
-                            },
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.close, size: 22, color: colorScheme.onSecondary,),
-                                Text(' ปิด', style: TextStyle(fontSize: 20, color: colorScheme.onSecondary,),),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          }
-        );
-      },
-    );
   }
 
   Future<Widget> getMedia(String bucketid) async {
