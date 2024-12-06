@@ -311,7 +311,7 @@ class _QuizChoiceDialogState extends State<QuizChoiceDialog> {
 
     for(var choice in choices) {
       Future<Widget> mediaWidget;
-      if(choice.mediaid != null) {
+      if(choice.mediaid != null && choice.mediaid!.isNotEmpty) {
         mediaWidget = getMedia(choice.mediaid!);
       } else {
          mediaWidget = Future.value(ImageThumbnailWidget(image: Image.asset('assets/images/default_picture.png',)));

@@ -43,7 +43,7 @@ class _LoginPageState extends State<LoginPage> {
         if(loginSession.sessionActive) {
           Future.delayed(const Duration(seconds: 3)).then((value) {
             // ignore: use_build_context_synchronously
-            context.go('/dashboard');
+            context.go('/about');
           },);
 
           return Row(
@@ -248,7 +248,7 @@ class _LoginPageState extends State<LoginPage> {
         context.pop();
 
         // ignore: use_build_context_synchronously
-        context.go('/dashboard');
+        context.go('/about');
       } else {
         // ignore: use_build_context_synchronously
         context.pop();

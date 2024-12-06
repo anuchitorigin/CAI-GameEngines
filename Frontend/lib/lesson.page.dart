@@ -12,6 +12,9 @@ import 'package:provider/provider.dart';
 import 'package:flutter_quill/flutter_quill.dart' as Quill;
 
 import 'package:cai_gameengine/components/common/image_thumbnail.widget.dart';
+import 'package:cai_gameengine/components/common/exam_timer.widget.dart';
+
+import 'package:cai_gameengine/services/storage_manager.service.dart';
 
 import 'package:cai_gameengine/api/module.api.dart';
 import 'package:cai_gameengine/api/assessment.api.dart';
@@ -42,6 +45,18 @@ class CreateUpdateOneState extends CreateUpdateOne {
   });
 }
 
+class LessonListItem {
+  int lessonID;
+  int lessonNo;
+  String lessonTitle;
+
+  LessonListItem({
+    required this.lessonID,
+    required this.lessonNo,
+    required this.lessonTitle
+  });
+}
+
 class LessonPage extends StatefulWidget {
   const LessonPage({super.key});
 
@@ -55,13 +70,13 @@ class _LessonPageState extends State<LessonPage> {
   final Quill.QuillController _choiceContentController = Quill.QuillController.basic();
   final Quill.QuillController _feedbackContentController = Quill.QuillController.basic();
 
-  List<int> lessonIDList = [];
+  List<LessonListItem> lessonList = [];
 
   int lessonListIndex = -1;
   int quizIndex = -1;
 
+  bool stopTimer = false;
   int examTime = 0;
-  Timer? examTimer;
 
   List<CreateUpdateOneState> quizChoiceList = [];
 
@@ -110,8 +125,6 @@ class _LessonPageState extends State<LessonPage> {
   @override
   void dispose() {
     super.dispose();
-
-    examTimer?.cancel();
   }
 
   loadModule() async {
@@ -146,7 +159,13 @@ class _LessonPageState extends State<LessonPage> {
 
             final int length = lessons.length;
             for(int i = 0; i < length; i++) {
-              lessonIDList.add(lessons[i].id);
+              lessonList.add(
+                LessonListItem(
+                  lessonID: lessons[i].id,
+                  lessonNo: lessons[i].lessonno,
+                  lessonTitle: lessons[i].title
+                )
+              );
             }
           }
         }
@@ -188,17 +207,6 @@ class _LessonPageState extends State<LessonPage> {
       }
     }
   }
-
-  void timerCallback(timer) {
-    setState(() {
-      examTime--;
-    });
-
-    if(examTime <= 0) {
-      examTimer?.cancel();
-      showExpireDialog();
-    }
-  }
   
   @override
   Widget build(BuildContext context) {
@@ -222,7 +230,7 @@ class _LessonPageState extends State<LessonPage> {
           child: Builder(
             builder: (BuildContext context) {
               if(!isLoading && module != null) {
-                if(lessonListIndex >= lessonIDList.length) {
+                if(lessonListIndex >= lessonList.length) {
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -236,9 +244,6 @@ class _LessonPageState extends State<LessonPage> {
 
                           lessonListIndex = -1;
                           lesson = null;
-
-                          examTimer?.cancel();
-                          examTimer = null;
 
                           examTime = 0;
 
@@ -355,7 +360,7 @@ class _LessonPageState extends State<LessonPage> {
                   loading.presentLoading(context);
                   
                   lessonListIndex = 0;
-                  await loadLesson(lessonIDList[lessonListIndex]);
+                  await loadLesson(lessonList[lessonListIndex].lessonID);
 
                   // ignore: use_build_context_synchronously
                   context.pop();
@@ -429,6 +434,13 @@ class _LessonPageState extends State<LessonPage> {
                         barrierDismissible: false,
                         context: context,
                         builder: (BuildContext context) {
+                          TextEditingController mynoteController = TextEditingController();
+                          if(loginSession.user != null) {
+                            StorageManager.readData('mynote-${loginSession.user!.userid}').then((onValue) {
+                              mynoteController.text = onValue ?? '';
+                            });
+                          }
+
                           return LayoutBuilder(
                             builder: (BuildContext context, BoxConstraints constraints) {
                               globalConstraints = constraints;
@@ -440,11 +452,12 @@ class _LessonPageState extends State<LessonPage> {
                               final dialogWidth = isLg ? constraints.maxWidth * 0.4 : (isMd ? constraints.maxWidth * 0.5 : (isSm ? constraints.maxWidth * 0.8 : constraints.maxWidth * 0.9));
 
                               return Dialog(
+                                backgroundColor: colorScheme.surfaceContainer,
                                 child: Padding(
                                   padding: const EdgeInsets.all(15),
                                   child: SizedBox(
                                     width: dialogWidth,
-                                    height: constraints.maxHeight / 2,
+                                    // height: constraints.maxHeight / 2,
                                     child: Column(
                                       children: [
                                         Row(
@@ -470,7 +483,18 @@ class _LessonPageState extends State<LessonPage> {
                                         ),
                                         Expanded(
                                           flex: 1,
-                                          child: Container()
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: colorScheme.surfaceContainerLow,
+                                              border: Border.all(width: 1.0, color: colorScheme.onSurface,),
+                                              borderRadius: BorderRadius.circular(5.0),
+                                            ),
+                                            child: TextField(
+                                              controller: mynoteController,
+                                              minLines: 30,
+                                              maxLines: 30,
+                                            ),
+                                          ),
                                         ),
                                         const Divider(
                                           thickness: 1.0,
@@ -483,7 +507,15 @@ class _LessonPageState extends State<LessonPage> {
                                                 backgroundColor: colorScheme.primary,
                                                 padding: const EdgeInsets.fromLTRB(25, 15, 25, 15),
                                               ),
-                                              onPressed: () {},
+                                              onPressed: () {
+                                                final LoadingDialogService loading = LoadingDialogService();
+                                                loading.presentLoading(context);
+                                                
+                                                StorageManager.saveData('mynote-${loginSession.user!.userid}', mynoteController.value.text);
+
+                                                context.pop();
+                                                context.pop();
+                                              },
                                               child: Row(
                                                 mainAxisAlignment: MainAxisAlignment.center,
                                                 mainAxisSize: MainAxisSize.min,
@@ -671,101 +703,87 @@ class _LessonPageState extends State<LessonPage> {
         Expanded(
           flex: 1,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              ElevatedButton(
-                onPressed: () async {
-                  final LoadingDialogService loading = LoadingDialogService();
-                  loading.presentLoading(context);
-
-                  setState(() {
-                    isLoading = true;
-                  });
-
-                  choiceSelection = null;
-                  assessment = null;
-
-                  lessonListIndex--;
-                  if(lessonListIndex >= 0) {
-                    await loadLesson(lessonIDList[lessonListIndex]);
-
-                    // ignore: use_build_context_synchronously
-                    context.pop();
+              SizedBox(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final LoadingDialogService loading = LoadingDialogService();
+                    loading.presentLoading(context);
 
                     setState(() {
-                      isLoading = false;
+                      isLoading = true;
                     });
-                  } else {
-                    mediaWidget = Future.value(null);
 
-                    quizIndex = -1;
-                    lesson = null;
+                    final AssessmentAPI assessmentAPI = AssessmentAPI();
+                    try {
+                      APIResult resAssessment = await assessmentAPI.createOne(loginSession.token, null, module!.id, lesson!.id);
 
-                    // ignore: use_build_context_synchronously
-                    context.pop();
+                      if(resAssessment.status == 1) {
+                        // ignore: use_build_context_synchronously
+                        context.pop();
 
-                    setState(() {
-                      isLoading = false;
-                    });
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  maximumSize: const Size.fromWidth(140),
-                  padding: const EdgeInsets.all(15),
-                  backgroundColor: colorScheme.secondary,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.arrow_back, color: colorScheme.onSecondary,),
-                    Text(' ถอยกลับ', style: TextStyle(fontSize: 16, color: colorScheme.onSecondary,),),
-                  ],
-                ),
-              ),
-              const SizedBox(
-                width: 50.0,
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  final LoadingDialogService loading = LoadingDialogService();
-                  loading.presentLoading(context);
+                        setState(() {
+                          quizIndex = -1;
+                          assessment = resAssessment.result[0] as CreateAssessmentResult;
 
-                  setState(() {
-                    isLoading = true;
-                  });
+                          examTime = assessment!.examminute.toInt() * 60;
 
-                  final AssessmentAPI assessmentAPI = AssessmentAPI();
-                  try {
-                    APIResult resAssessment = await assessmentAPI.createOne(loginSession.token, null, module!.id, lessonIDList[lessonListIndex]);
+                          final int length = assessment!.quizzes.length;
+                          for(int i = 0; i < length; i++) {
+                            quizChoiceList.add(
+                              CreateUpdateOneState(
+                                id: assessment!.quizzes[i].id,
+                                choice_id: 0,
+                                becorrect: false,
+                                feedback: Uint8List(0)
+                              )
+                            );
+                          }
 
-                    if(resAssessment.status == 1) {
+                          isLoading = false;
+                        });
+                      } else {
+                        final FailureDialog failureDialog = FailureDialog();
+
+                        // ignore: use_build_context_synchronously
+                        failureDialog.showFailure(context, colorScheme, resAssessment.message);
+                      }
+                    } catch(err) {
+                      final FailureDialog failureDialog = FailureDialog();
+
                       // ignore: use_build_context_synchronously
-                      context.pop();
+                      failureDialog.showFailure(context, colorScheme, 'ไม่มีแบบทดสอบสำหรับบทเรียนนี้');
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    maximumSize: const Size.fromWidth(140),
+                    padding: const EdgeInsets.all(15),
+                    backgroundColor: Colors.black,
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('แบบทดสอบ', style: TextStyle(fontSize: 16, color: Colors.white,),),
+                    ],
+                  ),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: () async {
+                      final LoadingDialogService loading = LoadingDialogService();
+                      loading.presentLoading(context);
 
                       setState(() {
-                        quizIndex = -1;
-                        assessment = resAssessment.result[0] as CreateAssessmentResult;
-
-                        examTime = assessment!.examminute.toInt() * 60;
-
-                        final int length = assessment!.quizzes.length;
-                        for(int i = 0; i < length; i++) {
-                          quizChoiceList.add(
-                            CreateUpdateOneState(
-                              id: assessment!.quizzes[i].id,
-                              choice_id: 0,
-                              becorrect: false,
-                              feedback: Uint8List(0)
-                            )
-                          );
-                        }
-
-                        isLoading = false;
+                        isLoading = true;
                       });
-                    } else {
-                      lessonListIndex++;
-                      if(lessonListIndex < lessonIDList.length) {
-                        await loadLesson(lessonIDList[lessonListIndex]);
+
+                      lessonListIndex--;
+                      if(lessonListIndex >= 0) {
+                        await loadLesson(lessonList[lessonListIndex].lessonID);
 
                         // ignore: use_build_context_synchronously
                         context.pop();
@@ -774,6 +792,11 @@ class _LessonPageState extends State<LessonPage> {
                           isLoading = false;
                         });
                       } else {
+                        mediaWidget = Future.value(null);
+
+                        quizIndex = -1;
+                        lesson = null;
+
                         // ignore: use_build_context_synchronously
                         context.pop();
 
@@ -781,11 +804,73 @@ class _LessonPageState extends State<LessonPage> {
                           isLoading = false;
                         });
                       }
-                    }
-                  } catch(err) {
-                    lessonListIndex++;
-                    if(lessonListIndex < lessonIDList.length) {
-                      await loadLesson(lessonIDList[lessonListIndex]);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      maximumSize: const Size.fromWidth(140),
+                      padding: const EdgeInsets.all(15),
+                      backgroundColor: colorScheme.secondary,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.arrow_back, color: colorScheme.onSecondary,),
+                        Text(' ถอยกลับ', style: TextStyle(fontSize: 16, color: colorScheme.onSecondary,),),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 50.0,
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('ไปที่เนื้อหา', style: TextStyle(fontSize: 12.0,),),
+                      DropdownButton(
+                        padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 3.0),
+                        onChanged: (value) async {
+                          if(value != null) {
+                            final LoadingDialogService loading = LoadingDialogService();
+                            // ignore: use_build_context_synchronously
+                            loading.presentLoading(context);
+
+                            lessonListIndex = value;
+
+                            await loadLesson(lessonList[lessonListIndex].lessonID);
+
+                            // ignore: use_build_context_synchronously
+                            context.pop();
+
+                            setState(() {});
+                          }
+                        },
+                        value: lessonListIndex,
+                        items: lessonList.asMap().map((i, element) {
+                          return MapEntry(i,
+                            DropdownMenuItem<int>(
+                              value: i,
+                              child: Text('${element.lessonNo}. ${element.lessonTitle}'),
+                            ),
+                          );
+                        }).values.toList(),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    width: 50.0,
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final LoadingDialogService loading = LoadingDialogService();
+                      loading.presentLoading(context);
+
+                      setState(() {
+                        isLoading = true;
+                      });
+
+                      lessonListIndex++;
+                      if(lessonListIndex < lessonList.length) {
+                        await loadLesson(lessonList[lessonListIndex].lessonID);
+                      }
 
                       // ignore: use_build_context_synchronously
                       context.pop();
@@ -793,29 +878,92 @@ class _LessonPageState extends State<LessonPage> {
                       setState(() {
                         isLoading = false;
                       });
-                    } else {
-                      // ignore: use_build_context_synchronously
-                      context.pop();
 
-                      setState(() {
-                        isLoading = false;
-                      });
-                    }
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  maximumSize: const Size.fromWidth(140),
-                  padding: const EdgeInsets.all(15),
-                  backgroundColor: colorScheme.primary,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('ถัดไป ', style: TextStyle(fontSize: 16, color: colorScheme.onPrimary,),),
-                    Icon(Icons.arrow_forward, color: colorScheme.onPrimary,),
-                  ],
-                ),
+                      // final AssessmentAPI assessmentAPI = AssessmentAPI();
+                      // try {
+                      //   APIResult resAssessment = await assessmentAPI.createOne(loginSession.token, null, module!.id, lessonList[lessonListIndex].lessonID);
+
+                      //   if(resAssessment.status == 1) {
+                      //     // ignore: use_build_context_synchronously
+                      //     context.pop();
+
+                      //     setState(() {
+                      //       quizIndex = -1;
+                      //       assessment = resAssessment.result[0] as CreateAssessmentResult;
+
+                      //       examTime = assessment!.examminute.toInt() * 60;
+
+                      //       final int length = assessment!.quizzes.length;
+                      //       for(int i = 0; i < length; i++) {
+                      //         quizChoiceList.add(
+                      //           CreateUpdateOneState(
+                      //             id: assessment!.quizzes[i].id,
+                      //             choice_id: 0,
+                      //             becorrect: false,
+                      //             feedback: Uint8List(0)
+                      //           )
+                      //         );
+                      //       }
+
+                      //       isLoading = false;
+                      //     });
+                      //   } else {
+                      //     lessonListIndex++;
+                      //     if(lessonListIndex < lessonList.length) {
+                      //       await loadLesson(lessonList[lessonListIndex].lessonID);
+
+                      //       // ignore: use_build_context_synchronously
+                      //       context.pop();
+
+                      //       setState(() {
+                      //         isLoading = false;
+                      //       });
+                      //     } else {
+                      //       // ignore: use_build_context_synchronously
+                      //       context.pop();
+
+                      //       setState(() {
+                      //         isLoading = false;
+                      //       });
+                      //     }
+                      //   }
+                      // } catch(err) {
+                      //   lessonListIndex++;
+                      //   if(lessonListIndex < lessonList.length) {
+                      //     await loadLesson(lessonList[lessonListIndex].lessonID);
+
+                      //     // ignore: use_build_context_synchronously
+                      //     context.pop();
+
+                      //     setState(() {
+                      //       isLoading = false;
+                      //     });
+                      //   } else {
+                      //     // ignore: use_build_context_synchronously
+                      //     context.pop();
+
+                      //     setState(() {
+                      //       isLoading = false;
+                      //     });
+                      //   }
+                      // }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      maximumSize: const Size.fromWidth(140),
+                      padding: const EdgeInsets.all(15),
+                      backgroundColor: colorScheme.primary,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('ถัดไป ', style: TextStyle(fontSize: 16, color: colorScheme.onPrimary,),),
+                        Icon(Icons.arrow_forward, color: colorScheme.onPrimary,),
+                      ],
+                    ),
+                  ),
+                ],
               ),
+              Container(),
             ],
           )
         ),
@@ -870,9 +1018,9 @@ class _LessonPageState extends State<LessonPage> {
             children: [
               ElevatedButton(
                 onPressed: () async {
-                  if(examTime > 0) {
-                    examTimer = Timer.periodic(const Duration(seconds: 1), timerCallback);
-                  }
+                  setState(() {
+                    stopTimer = false;
+                  });
 
                   setState(() {
                     quizIndex++;
@@ -930,20 +1078,16 @@ class _LessonPageState extends State<LessonPage> {
               flex: 2,
               child: Column(
                 children: [
-                  Container(
-                    width: double.maxFinite,
-                    padding: const EdgeInsets.symmetric(vertical: 5.0),
-                    decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainer,
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    child: Column(
-                      children: [
-                        const Icon(Icons.access_time,),
-                        Text(examTimer != null ? '${(examTime / 60).floor().toString().padLeft(2, '0')}:${(examTime % 60).toString().padLeft(2, '0')}' : '--:--', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold,),),
-                        Text(examTimer != null ? 'เวลาคงเหลือ' : 'ไม่กำหนดเวลา', style: const TextStyle(fontSize: 12,),),
-                      ],
-                    ),
+                  ExamTimerWidget(
+                    isStop: stopTimer,
+                    remainingSeconds: examTime,
+                    onCount: (remainingTime) {
+                      examTime = remainingTime;
+
+                      if(examTime <= 0) {
+                        showExpireDialog();
+                      }
+                    }
                   ),
                   const SizedBox(
                     height: 5.0,
@@ -953,8 +1097,9 @@ class _LessonPageState extends State<LessonPage> {
                     children: [
                       ElevatedButton(
                         onPressed: () async {
-                          examTimer?.cancel();
-                          examTimer = null;
+                          setState(() {
+                            stopTimer = true;
+                          });
 
                           final bool isSubmit = await showSubmitExamDialog();
 
@@ -970,28 +1115,16 @@ class _LessonPageState extends State<LessonPage> {
                             quizChoiceList.clear();
                             assessment = null;
 
-                            lessonListIndex++;
-                            if(lessonListIndex < lessonIDList.length) {
-                              await loadLesson(lessonIDList[lessonListIndex]);
+                            // ignore: use_build_context_synchronously
+                            context.pop();
 
-                              // ignore: use_build_context_synchronously
-                              context.pop();
-
-                              setState(() {
-                                isLoading = false;
-                              });
-                            } else {
-                              // ignore: use_build_context_synchronously
-                              context.pop();
-
-                              setState(() {
-                                isLoading = false;
-                              });
-                            }
+                            setState(() {
+                              isLoading = false;
+                            });
                           } else {
-                            if(examTime > 0) {
-                              examTimer = Timer.periodic(const Duration(seconds: 1), timerCallback);
-                            }
+                            setState(() {
+                              stopTimer = false;
+                            });
                           }
                         },
                         style: ElevatedButton.styleFrom(
@@ -1002,7 +1135,7 @@ class _LessonPageState extends State<LessonPage> {
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('ส่งกระดาษคำตอบ', style: TextStyle(fontSize: 16, color: Colors.white,),),
+                            Text('ปิดแบบทดสอบ', style: TextStyle(fontSize: 16, color: Colors.white,),),
                           ],
                         ),
                       )
@@ -1030,137 +1163,131 @@ class _LessonPageState extends State<LessonPage> {
                 ),
                 Expanded(
                   flex: 5,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text('${currentQuiz.quizno}. ${currentQuiz.question}', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold,),),
-                      const SizedBox(
-                        height: 10.0,
-                      ),
-                      ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: currentQuiz.choices.length,
-                        itemBuilder: (context, index) {
-                          Future<Widget> choiceMediaWidget = Future.value(Container());
-                          if(currentQuiz.choices[index].mediaid.isNotEmpty) {
-                            choiceMediaWidget = getMedia(currentQuiz.choices[index].mediaid);
-                          }
+                  child: SizedBox(
+                    height: double.maxFinite,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('${currentQuiz.quizno}. ${currentQuiz.question}', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold,),),
+                          const SizedBox(
+                            height: 10.0,
+                          ),
+                          ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: currentQuiz.choices.length,
+                            itemBuilder: (context, index) {
+                              Future<Widget> choiceMediaWidget = Future.value(Container());
+                              if(currentQuiz.choices[index].mediaid.isNotEmpty) {
+                                choiceMediaWidget = getMedia(currentQuiz.choices[index].mediaid);
+                              }
 
-                          return Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.center,
+                              return Column(
                                 children: [
-                                  Radio<QuizChoice>(
-                                    value: currentQuiz.choices[index],
-                                    groupValue: choiceSelection,
-                                    onChanged: choiceSelection != null && quizChoiceList.firstWhere((e) => e.id == currentQuiz.id).choice_id == choiceSelection!.id ? null : (QuizChoice? value) async {
-                                      setState(() {
-                                        choiceSelection = value;
-                                      });
-                                    },
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Radio<QuizChoice>(
+                                        value: currentQuiz.choices[index],
+                                        groupValue: choiceSelection,
+                                        onChanged: choiceSelection != null && quizChoiceList.firstWhere((e) => e.id == currentQuiz.id).choice_id == choiceSelection!.id ? null : (QuizChoice? value) async {
+                                          setState(() {
+                                            choiceSelection = value;
+                                          });
+                                        },
+                                      ),
+                                      const SizedBox(
+                                        width: 10,
+                                      ),
+                                      FutureBuilder<Widget>(
+                                        future: choiceMediaWidget,
+                                        builder: (context, AsyncSnapshot coverSnapshot) {
+                                          if(coverSnapshot.hasData) {
+                                            if(coverSnapshot.data!.toString() != 'Container') {
+                                              return Container(
+                                                width: 100,
+                                                height: 100,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius: BorderRadius.circular(10.0),
+                                                ),
+                                                child: coverSnapshot.data!
+                                              );
+                                            } else {
+                                              return coverSnapshot.data!;
+                                            }
+                                          } else {
+                                            return SizedBox(
+                                              width: 60,
+                                              height: 60,
+                                              child: CircularProgressIndicator(
+                                                color: colorScheme.secondary,
+                                              ),
+                                            );
+                                          }
+                                        }
+                                      ),
+                                      FutureBuilder<Widget>(
+                                        future: choiceMediaWidget,
+                                        builder: (context, AsyncSnapshot coverSnapshot) {
+                                          if(coverSnapshot.hasData) {
+                                            if(coverSnapshot.data!.toString() != 'Container') {
+                                              return const SizedBox(
+                                                width: 10,
+                                              );
+                                            } else {
+                                              return Container();
+                                            }
+                                          } else {
+                                            return Container();
+                                          }
+                                        }
+                                      ),
+                                      Text(currentQuiz.choices[index].answer, style: TextStyle(fontSize: 16, color: colorScheme.onSurface,),),
+                                      Visibility(
+                                        visible: choiceSelection != null && quizChoiceList.firstWhere((e) => e.id == currentQuiz.id).choice_id == currentQuiz.choices[index].id,
+                                        child: const SizedBox(
+                                          width: 10,
+                                        ),
+                                      ),
+                                      Visibility(
+                                        visible: choiceSelection != null && quizChoiceList.firstWhere((e) => e.id == currentQuiz.id).choice_id == currentQuiz.choices[index].id,
+                                        child: quizChoiceList.firstWhere((e) => e.id == currentQuiz.id).becorrect ?
+                                          Icon(Icons.check, size: 32, color: colorScheme.brightness == Brightness.light ? const Color( 0xFF009000 ) : const Color( 0xFF0FF000 ),) :
+                                          const Icon(Icons.close, size: 32, color: Color(0xFFFF0000),),
+                                      ),
+                                    ],
                                   ),
                                   const SizedBox(
-                                    width: 10,
-                                  ),
-                                  FutureBuilder<Widget>(
-                                    future: choiceMediaWidget,
-                                    builder: (context, AsyncSnapshot coverSnapshot) {
-                                      if(coverSnapshot.hasData) {
-                                        if(coverSnapshot.data!.toString() != 'Container') {
-                                          return Container(
-                                            width: 100,
-                                            height: 100,
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius: BorderRadius.circular(10.0),
-                                            ),
-                                            child: coverSnapshot.data!
-                                          );
-                                        } else {
-                                          return coverSnapshot.data!;
-                                        }
-                                      } else {
-                                        return SizedBox(
-                                          width: 60,
-                                          height: 60,
-                                          child: CircularProgressIndicator(
-                                            color: colorScheme.secondary,
-                                          ),
-                                        );
-                                      }
-                                    }
-                                  ),
-                                  FutureBuilder<Widget>(
-                                    future: choiceMediaWidget,
-                                    builder: (context, AsyncSnapshot coverSnapshot) {
-                                      if(coverSnapshot.hasData) {
-                                        if(coverSnapshot.data!.toString() != 'Container') {
-                                          return const SizedBox(
-                                            width: 10,
-                                          );
-                                        } else {
-                                          return Container();
-                                        }
-                                      } else {
-                                        return Container();
-                                      }
-                                    }
-                                  ),
-                                  Text(currentQuiz.choices[index].answer, style: TextStyle(fontSize: 16, color: colorScheme.onSurface,),),
-                                  Visibility(
-                                    visible: choiceSelection != null && quizChoiceList.firstWhere((e) => e.id == currentQuiz.id).choice_id == currentQuiz.choices[index].id,
-                                    child: const SizedBox(
-                                      width: 10,
-                                    ),
-                                  ),
-                                  Visibility(
-                                    visible: choiceSelection != null && quizChoiceList.firstWhere((e) => e.id == currentQuiz.id).choice_id == currentQuiz.choices[index].id,
-                                    child: quizChoiceList.firstWhere((e) => e.id == currentQuiz.id).becorrect ?
-                                      Icon(Icons.check, size: 32, color: colorScheme.brightness == Brightness.light ? const Color( 0xFF009000 ) : const Color( 0xFF0FF000 ),) :
-                                      const Icon(Icons.close, size: 32, color: Color(0xFFFF0000),),
+                                    height: 20.0,
                                   ),
                                 ],
-                              ),
-                              const SizedBox(
-                                height: 20.0,
-                              ),
-                            ],
-                          );
-                        }
-                      ),
-                      Visibility(
-                        visible: choiceSelection != null && quizChoiceList.firstWhere((e) => e.id == currentQuiz.id).choice_id == choiceSelection!.id && quizChoiceList.firstWhere((e) => e.id == currentQuiz.id).feedback.isNotEmpty,
-                        child: Expanded(
-                          flex: 1,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 5.0,),
-                            child: Container(
-                              padding: const EdgeInsets.all(10),
-                              width: double.maxFinite,
-                              height: double.maxFinite,
-                              decoration: BoxDecoration(
-                                border: Border.all(width: 3.0, color: colorScheme.onSurface,),
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Quill.QuillEditor.basic(
-                                      controller: _feedbackContentController,
-                                      configurations: const Quill.QuillEditorConfigurations(),
-                                    ),
-                                  ],
+                              );
+                            }
+                          ),
+                          Visibility(
+                            visible: choiceSelection != null && quizChoiceList.firstWhere((e) => e.id == currentQuiz.id).choice_id == choiceSelection!.id && quizChoiceList.firstWhere((e) => e.id == currentQuiz.id).feedback.isNotEmpty,
+                            child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 5.0,),
+                                child: Container(
+                                  padding: const EdgeInsets.all(10),
+                                  width: double.maxFinite,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(width: 3.0, color: colorScheme.onSurface,),
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                  child: Quill.QuillEditor.basic(
+                                    controller: _feedbackContentController,
+                                    configurations: const Quill.QuillEditorConfigurations(),
+                                  ),
                                 ),
                               ),
-                            ),
                           ),
-                        )
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
                 Expanded(
@@ -1268,7 +1395,7 @@ class _LessonPageState extends State<LessonPage> {
                 ),
               ),
               ElevatedButton(
-                onPressed: choiceSelection == null || quizChoiceList.firstWhere((e) => e.id == currentQuiz.id).choice_id == choiceSelection!.id ? null : () async {
+                onPressed: choiceSelection == null || (choiceSelection != null && quizChoiceList.firstWhere((e) => e.id == currentQuiz.id).choice_id == choiceSelection!.id) ? null : () async {
                   final LoadingDialogService loading = LoadingDialogService();
                   loading.presentLoading(context);
 
@@ -1286,8 +1413,9 @@ class _LessonPageState extends State<LessonPage> {
                       // ignore: use_build_context_synchronously
                       context.pop();
 
-                      examTimer?.cancel();
-                      examTimer = null;
+                      setState(() {
+                        stopTimer = true;
+                      });
 
                       await showFeedbackDialog(checkchoice.becorrect, feedback.bucketdata.data);
 
@@ -1302,9 +1430,9 @@ class _LessonPageState extends State<LessonPage> {
                         _feedbackContentController.document = Quill.Document();
                       }
 
-                      if(examTime > 0) {
-                        examTimer = Timer.periodic(const Duration(seconds: 1), timerCallback);
-                      }
+                      setState(() {
+                        stopTimer = false;
+                      });
                     }
                   }
 
@@ -1376,7 +1504,7 @@ class _LessonPageState extends State<LessonPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('ต้องการส่งกระดาษคำตอบหรือไม่', style: TextStyle(fontSize: 36, color: colorScheme.onSurface,),),
+          title: Text('ต้องการปิดแบบทดสอบหรือไม่', style: TextStyle(fontSize: 36, color: colorScheme.onSurface,),),
           actions: [
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -1395,7 +1523,7 @@ class _LessonPageState extends State<LessonPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('ส่ง', style: TextStyle(fontSize: 20, color: colorScheme.onPrimary,),),
+                  Text('ปิด', style: TextStyle(fontSize: 20, color: colorScheme.onPrimary,),),
                 ],
               ),
             ),
@@ -1438,42 +1566,27 @@ class _LessonPageState extends State<LessonPage> {
                 padding: const EdgeInsets.fromLTRB(25, 15, 25, 15),
               ),
               onPressed: () async {
-                examTimer?.cancel();
-                examTimer = null;
+                final LoadingDialogService loading = LoadingDialogService();
+                // ignore: use_build_context_synchronously
+                loading.presentLoading(context);
 
                 final bool submitSuccess = await submitExam();
 
+                // ignore: use_build_context_synchronously
+                context.pop();
+
                 if(submitSuccess) {
-                  final LoadingDialogService loading = LoadingDialogService();
-                  // ignore: use_build_context_synchronously
-                  loading.presentLoading(context);
-
                   lessonListIndex++;
-                  if(lessonListIndex < lessonIDList.length) {
-                    await loadLesson(lessonIDList[lessonListIndex]);
-
-                    // ignore: use_build_context_synchronously
-                    context.pop();
-                    // ignore: use_build_context_synchronously
-                    context.pop();
-
-                    setState(() {
-                      isLoading = false;
-                    });
-                  } else {
-                    // ignore: use_build_context_synchronously
-                    context.pop();
-                    // ignore: use_build_context_synchronously
-                    context.pop();
-
-                    setState(() {
-                      isLoading = false;
-                    });
+                  if(lessonListIndex < lessonList.length) {
+                    await loadLesson(lessonList[lessonListIndex].lessonID);
                   }
-                } else {
-                  if(examTime > 0) {
-                    examTimer = Timer.periodic(const Duration(seconds: 1), timerCallback);
-                  }
+                  
+                  // ignore: use_build_context_synchronously
+                  context.pop();
+
+                  setState(() {
+                    isLoading = false;
+                  });
                 }
               },
               child: Row(
@@ -1517,8 +1630,6 @@ class _LessonPageState extends State<LessonPage> {
     final AssessmentAPI assessmentAPI = AssessmentAPI();
     APIResult resUpdate = await assessmentAPI.updateOne(loginSession.token, assessment!.assessment_id, assessment!.examid, assessment!.examminute > 0 ? (((assessment!.examminute * 60) - examTime) / 60).ceil() : 1, quizChoiceList);
     if(resUpdate.status == 1) {
-      examTimer?.cancel();
-      examTimer = null;
       examTime = 0;
 
       assessment = null;

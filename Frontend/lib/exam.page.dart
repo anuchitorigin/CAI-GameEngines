@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_quill/flutter_quill.dart' as Quill;
 
 import 'package:cai_gameengine/components/common/image_thumbnail.widget.dart';
+import 'package:cai_gameengine/components/common/exam_timer.widget.dart';
 
 import 'package:cai_gameengine/api/module.api.dart';
 import 'package:cai_gameengine/api/assessment.api.dart';
@@ -43,8 +44,9 @@ class _ExamPageState extends State<ExamPage> {
 
   int quizIndex = -1;
 
+  bool stopTimer = false;
   int examTime = 0;
-  Timer? examTimer;
+  // Timer? examTimer;
 
   List<CreateUpdateOne> quizChoiceList = [];
 
@@ -91,7 +93,7 @@ class _ExamPageState extends State<ExamPage> {
   void dispose() {
     super.dispose();
 
-    examTimer?.cancel();
+    // examTimer?.cancel();
   }
 
   loadModule() async {
@@ -174,16 +176,16 @@ class _ExamPageState extends State<ExamPage> {
     }
   }
 
-  void timerCallback(timer) {
-    setState(() {
-      examTime--;
-    });
+  // void timerCallback(timer) {
+  //   setState(() {
+  //     examTime--;
+  //   });
 
-    if(examTime <= 0) {
-      examTimer?.cancel();
-      showExpireDialog();
-    }
-  }
+  //   if(examTime <= 0) {
+  //     examTimer?.cancel();
+  //     showExpireDialog();
+  //   }
+  // }
   
   @override
   Widget build(BuildContext context) {
@@ -226,8 +228,8 @@ class _ExamPageState extends State<ExamPage> {
                         final LoadingDialogService loading = LoadingDialogService();
                         loading.presentLoading(context);
 
-                        examTimer?.cancel();
-                        examTimer = null;
+                        // examTimer?.cancel();
+                        // examTimer = null;
 
                         examTime = assessment!.examminute.toInt() * 60;
 
@@ -241,6 +243,7 @@ class _ExamPageState extends State<ExamPage> {
                         setState(() {
                           isFinish = false;
                           isLoading = false;
+                          stopTimer = true;
                         });
 
                         context.pop();
@@ -340,9 +343,13 @@ class _ExamPageState extends State<ExamPage> {
             children: [
               ElevatedButton(
                 onPressed: () async {
-                  if(examTime > 0) {
-                    examTimer = Timer.periodic(const Duration(seconds: 1), timerCallback);
-                  }
+                  examTime = assessment!.examminute.toInt() * 60;
+                  // if(examTime > 0) {
+                  //   examTimer = Timer.periodic(const Duration(seconds: 1), timerCallback);
+                  // }
+                  setState(() {
+                    stopTimer = false;
+                  });
 
                   setState(() {
                     quizIndex++;
@@ -400,21 +407,32 @@ class _ExamPageState extends State<ExamPage> {
               flex: 2,
               child: Column(
                 children: [
-                  Container(
-                    width: double.maxFinite,
-                    padding: const EdgeInsets.symmetric(vertical: 5.0),
-                    decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainer,
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    child: Column(
-                      children: [
-                        const Icon(Icons.access_time,),
-                        Text(examTimer != null ? '${(examTime / 60).floor().toString().padLeft(2, '0')}:${(examTime % 60).toString().padLeft(2, '0')}' : '--:--', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold,),),
-                        Text(examTimer != null ? 'เวลาคงเหลือ' : 'ไม่กำหนดเวลา', style: const TextStyle(fontSize: 12,),),
-                      ],
-                    ),
+                  ExamTimerWidget(
+                    isStop: stopTimer,
+                    remainingSeconds: examTime,
+                    onCount: (remainingTime) {
+                      examTime = remainingTime;
+
+                      if(examTime <= 0) {
+                        showExpireDialog();
+                      }
+                    }
                   ),
+                  // Container(
+                  //   width: double.maxFinite,
+                  //   padding: const EdgeInsets.symmetric(vertical: 5.0),
+                  //   decoration: BoxDecoration(
+                  //     color: colorScheme.surfaceContainer,
+                  //     borderRadius: BorderRadius.circular(10.0),
+                  //   ),
+                  //   child: Column(
+                  //     children: [
+                  //       const Icon(Icons.access_time,),
+                  //       Text(examTimer != null ? '${(examTime / 60).floor().toString().padLeft(2, '0')}:${(examTime % 60).toString().padLeft(2, '0')}' : '--:--', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold,),),
+                  //       Text(examTimer != null ? 'เวลาคงเหลือ' : 'ไม่กำหนดเวลา', style: const TextStyle(fontSize: 12,),),
+                  //     ],
+                  //   ),
+                  // ),
                   const SizedBox(
                     height: 5.0,
                   ),
@@ -423,8 +441,11 @@ class _ExamPageState extends State<ExamPage> {
                     children: [
                       ElevatedButton(
                         onPressed: () async {
-                          examTimer?.cancel();
-                          examTimer = null;
+                          // examTimer?.cancel();
+                          // examTimer = null;
+                          setState(() {
+                            stopTimer = true;
+                          });
 
                           final bool isSubmit = await showSubmitExamDialog();
 
@@ -446,9 +467,12 @@ class _ExamPageState extends State<ExamPage> {
                               isFinish = true;
                             });
                           } else {
-                            if(examTime > 0) {
-                              examTimer = Timer.periodic(const Duration(seconds: 1), timerCallback);
-                            }
+                            // if(examTime > 0) {
+                            //   examTimer = Timer.periodic(const Duration(seconds: 1), timerCallback);
+                            // }
+                            setState(() {
+                              stopTimer = false;
+                            });
                           }
                         },
                         style: ElevatedButton.styleFrom(
@@ -487,97 +511,101 @@ class _ExamPageState extends State<ExamPage> {
                 ),
                 Expanded(
                   flex: 5,
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text('${currentQuiz.quizno}. ${currentQuiz.question}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold,),),
-                        const SizedBox(
-                          height: 10.0,
-                        ),
-                        ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: currentQuiz.choices.length,
-                          itemBuilder: (context, index) {
-                            Future<Widget> choiceMediaWidget = Future.value(Container());
-                            if(currentQuiz.choices[index].mediaid.isNotEmpty) {
-                              choiceMediaWidget = getMedia(currentQuiz.choices[index].mediaid);
-                            }
+                  child: SizedBox(
+                    height: double.maxFinite,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('${currentQuiz.quizno}. ${currentQuiz.question}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold,),),
+                          const SizedBox(
+                            height: 10.0,
+                          ),
+                          ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: currentQuiz.choices.length,
+                            itemBuilder: (context, index) {
+                              Future<Widget> choiceMediaWidget = Future.value(Container());
+                              if(currentQuiz.choices[index].mediaid.isNotEmpty) {
+                                choiceMediaWidget = getMedia(currentQuiz.choices[index].mediaid);
+                              }
 
-                            return Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Radio<QuizChoice>(
-                                      value: currentQuiz.choices[index],
-                                      groupValue: choiceSelection,
-                                      onChanged: (QuizChoice? value) async {
-                                        setState(() {
-                                          choiceSelection = value;
-                                          quizChoiceList.firstWhere((e) => e.id == currentQuiz.id).choice_id = choiceSelection!.id;
-                                        });
-                                      },
-                                    ),
-                                    const SizedBox(
-                                      width: 10,
-                                    ),
-                                    FutureBuilder<Widget>(
-                                      future: choiceMediaWidget,
-                                      builder: (context, AsyncSnapshot coverSnapshot) {
-                                        if(coverSnapshot.hasData) {
-                                          if(coverSnapshot.data!.toString() != 'Container') {
-                                            return Container(
-                                              width: 100,
-                                              height: 100,
-                                              decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                borderRadius: BorderRadius.circular(10.0),
-                                              ),
-                                              child: coverSnapshot.data!
-                                            );
+                              return Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Radio<QuizChoice>(
+                                        value: currentQuiz.choices[index],
+                                        groupValue: choiceSelection,
+                                        onChanged: (QuizChoice? value) async {
+                                          setState(() {
+                                            choiceSelection = value;
+                                            quizChoiceList.firstWhere((e) => e.id == currentQuiz.id).choice_id = choiceSelection!.id;
+                                          });
+                                        },
+                                      ),
+                                      const SizedBox(
+                                        width: 10,
+                                      ),
+                                      FutureBuilder<Widget>(
+                                        future: choiceMediaWidget,
+                                        builder: (context, AsyncSnapshot coverSnapshot) {
+                                          if(coverSnapshot.hasData) {
+                                            if(coverSnapshot.data!.toString() != 'Container') {
+                                              return Container(
+                                                width: 100,
+                                                height: 100,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius: BorderRadius.circular(10.0),
+                                                ),
+                                                child: coverSnapshot.data!
+                                              );
+                                            } else {
+                                              return coverSnapshot.data!;
+                                            }
                                           } else {
-                                            return coverSnapshot.data!;
-                                          }
-                                        } else {
-                                          return SizedBox(
-                                            width: 60,
-                                            height: 60,
-                                            child: CircularProgressIndicator(
-                                              color: colorScheme.secondary,
-                                            ),
-                                          );
-                                        }
-                                      }
-                                    ),
-                                    FutureBuilder<Widget>(
-                                      future: choiceMediaWidget,
-                                      builder: (context, AsyncSnapshot coverSnapshot) {
-                                        if(coverSnapshot.hasData) {
-                                          if(coverSnapshot.data!.toString() != 'Container') {
-                                            return const SizedBox(
-                                              width: 10,
+                                            return SizedBox(
+                                              width: 60,
+                                              height: 60,
+                                              child: CircularProgressIndicator(
+                                                color: colorScheme.secondary,
+                                              ),
                                             );
+                                          }
+                                        }
+                                      ),
+                                      FutureBuilder<Widget>(
+                                        future: choiceMediaWidget,
+                                        builder: (context, AsyncSnapshot coverSnapshot) {
+                                          if(coverSnapshot.hasData) {
+                                            if(coverSnapshot.data!.toString() != 'Container') {
+                                              return const SizedBox(
+                                                width: 10,
+                                              );
+                                            } else {
+                                              return Container();
+                                            }
                                           } else {
                                             return Container();
                                           }
-                                        } else {
-                                          return Container();
                                         }
-                                      }
-                                    ),
-                                    Text(currentQuiz.choices[index].answer, style: TextStyle(fontSize: 16, color: colorScheme.onSurface,),),
-                                  ],
-                                ),
-                                const SizedBox(
-                                  height: 20.0,
-                                ),
-                              ],
-                            );
-                          }
-                        ),
-                      ],
+                                      ),
+                                      Text(currentQuiz.choices[index].answer, style: TextStyle(fontSize: 16, color: colorScheme.onSurface,),),
+                                    ],
+                                  ),
+                                  const SizedBox(
+                                    height: 20.0,
+                                  ),
+                                ],
+                              );
+                            }
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -802,16 +830,16 @@ class _ExamPageState extends State<ExamPage> {
                 padding: const EdgeInsets.fromLTRB(25, 15, 25, 15),
               ),
               onPressed: () async {
-                examTimer?.cancel();
-                examTimer = null;
+                final LoadingDialogService loading = LoadingDialogService();
+                // ignore: use_build_context_synchronously
+                loading.presentLoading(context);
 
                 final bool submitSuccess = await submitExam();
 
-                if(submitSuccess) {
-                  final LoadingDialogService loading = LoadingDialogService();
-                  // ignore: use_build_context_synchronously
-                  loading.presentLoading(context);
+                // ignore: use_build_context_synchronously
+                  context.pop();
 
+                if(submitSuccess) {
                   // ignore: use_build_context_synchronously
                   context.pop();
 
@@ -819,10 +847,6 @@ class _ExamPageState extends State<ExamPage> {
                     isFinish = true;
                     isLoading = false;
                   });
-                } else {
-                  if(examTime > 0) {
-                    examTimer = Timer.periodic(const Duration(seconds: 1), timerCallback);
-                  }
                 }
               },
               child: Row(
@@ -866,8 +890,11 @@ class _ExamPageState extends State<ExamPage> {
     final AssessmentAPI assessmentAPI = AssessmentAPI();
     APIResult resUpdate = await assessmentAPI.updateOne(loginSession.token, assessment!.assessment_id, assessment!.examid, assessment!.examminute > 0 ? (((assessment!.examminute * 60) - examTime) / 60).ceil() : 1, quizChoiceList);
     if(resUpdate.status == 1) {
-      examTimer?.cancel();
-      examTimer = null;
+      // // examTimer?.cancel();
+      // // examTimer = null;
+      // setState(() {
+      //   stopTimer = true;
+      // });
       examTime = 0;
 
       choiceSelection = null;

@@ -1065,12 +1065,11 @@ class _DataExamPageState extends State<DataExamPage> {
                             ],
                           ),
                         ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('${exam.title} ', style: nameStyle,),
-                          ],
+                        Expanded(
+                          flex: 1,
+                          child: Container(
+                            child: Text(exam.title, style: const TextStyle(fontSize: 17,),),
+                          )
                         ),
                       ],
                     ),

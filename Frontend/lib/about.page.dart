@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class DashboardPage extends StatefulWidget {
-  const DashboardPage({super.key});
+class AboutPage extends StatefulWidget {
+  const AboutPage({super.key});
 
   @override
-  State<DashboardPage> createState() => _DashboardPageState();
+  State<AboutPage> createState() => _AboutPageState();
 }
 
-class _DashboardPageState extends State<DashboardPage> {
+class _AboutPageState extends State<AboutPage> {
   late ColorScheme colorScheme;
 
   @override
@@ -43,7 +43,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   const SizedBox(
                     height: 15,
                   ),
-                  Text('บทเรียนคอมพิวเตอร์ช่วยสอน (Computer Assisted Instruction - CAI) นี้จัดทำขึ้นเพื่อใช้เป็นสื่อประกอบการสอนรายวิชา เกมคอมพิวเตอร์ สำหรับนักศึกษาปริญญาบัณฑิตชั้นปีที่ 2 คณะครุศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย โดยมีสาระเนื้อหาดังนี้', textAlign: TextAlign.start, style: TextStyle(fontSize: contentSize,),),
+                  Text('บทเรียนคอมพิวเตอร์ช่วยสอน (Computer Assisted Instruction - CAI) นี้จัดทำขึ้นเพื่อใช้เป็นสื่อประกอบการสอนรายวิชา เกมคอมพิวเตอร์ สำหรับนักศึกษาปริญญาบัณฑิต คณะครุศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย โดยมีสาระเนื้อหาดังนี้', textAlign: TextAlign.start, style: TextStyle(fontSize: contentSize,),),
                   const SizedBox(
                     height: 15,
                   ),

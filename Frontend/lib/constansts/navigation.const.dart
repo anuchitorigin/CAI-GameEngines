@@ -1,6 +1,6 @@
 import 'package:cai_gameengine/home.page.dart';
 import 'package:cai_gameengine/profile.page.dart';
-import 'package:cai_gameengine/dashboard.page.dart';
+import 'package:cai_gameengine/about.page.dart';
 import 'package:cai_gameengine/lesson.page.dart';
 import 'package:cai_gameengine/exam.page.dart';
 
@@ -12,7 +12,7 @@ final navigationList = [
 
   ( path: '/profile', widget: const ProfilePage() ),
 
-  ( path: '/dashboard', widget: const DashboardPage() ),
+  ( path: '/about', widget: const AboutPage() ),
 
   ( path: '/lesson', widget: const LessonPage() ),
   ( path: '/exam', widget: const ExamPage() ),

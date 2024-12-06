@@ -857,12 +857,11 @@ class _DataModulePageState extends State<DataModulePage> {
                             ],
                           ),
                         ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('${module.title} ', style: nameStyle,),
-                          ],
+                        Expanded(
+                          flex: 1,
+                          child: Container(
+                            child: Text(module.title, style: const TextStyle(fontSize: 17,),),
+                          )
                         ),
                       ],
                     ),

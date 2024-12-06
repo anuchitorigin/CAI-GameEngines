@@ -699,8 +699,9 @@ class _ModuleDetailsPageState extends State<ModuleDetailsPage> {
                                                   Row(
                                                     children: [
                                                       Expanded(
-                                                        flex: 1,
+                                                        flex: 3,
                                                         child: Row(
+                                                          crossAxisAlignment: CrossAxisAlignment.center,
                                                           children: [
                                                             Padding(
                                                               padding: const EdgeInsets.only(right: 10),
@@ -740,12 +741,11 @@ class _ModuleDetailsPageState extends State<ModuleDetailsPage> {
                                                                 ],
                                                               ),
                                                             ),
-                                                            Column(
-                                                              mainAxisAlignment: MainAxisAlignment.start,
-                                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                                              children: [
-                                                                Text(lessons[index].title, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14,),),
-                                                              ],
+                                                            Expanded(
+                                                              flex: 1,
+                                                              child: Container(
+                                                                child: Text(lessons[index].title, style: const TextStyle(fontSize: 17,),),
+                                                              )
                                                             ),
                                                           ],
                                                         ),

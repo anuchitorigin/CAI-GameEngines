@@ -75,6 +75,7 @@ class LoginSessionModel extends ChangeNotifier {
     _token = '';
     _user = null;
     _complete = false;
+    _pretestDone = false;
     notifyListeners();
   }
 
