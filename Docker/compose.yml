@@ -1,14 +1,15 @@
 name: caige-dev
 
 services:
-  # frontend:
-  #   image: anuchitorigin/caige-frontend:latest
-  #   restart: always
-  #   ports:
-  #     - ${FR_MAIN_PORT}:${FR_MAIN_PORT}
-  #   depends_on:
-  #     - ba_main
-  #     - ba_auth
+  frontend:
+    image: anuchitorigin/caige-frontend:latest
+    restart: always
+    ports:
+      - ${FR_MAIN_PORT}:${FR_MAIN_PORT}
+    depends_on:
+      - ba_main
+      - ba_auth
+      - ba_data
   ba_main:
     image: anuchitorigin/caige-ba_main:latest
     command: npm start
