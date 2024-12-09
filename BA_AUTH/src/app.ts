@@ -30,7 +30,7 @@ import local from './routes/local';
 
 //################################# DECLARATION #################################
 const app: Express = express();
-const appver: string = 'v1.0.20241111';
+const appver: string = 'v1.0.20241208';
 const port: number = 57101;
 // const port: number = 80;
 const corsOptions: cors.CorsOptions = {
@@ -57,7 +57,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 /* define the HOME route */
-app.get('/', (req: Request, res: Response) => {
+app.get('/ping', (req: Request, res: Response) => {
   res.send(`This is BA_AUTH API endpoint. (Build: ${appver})`);
 });
 

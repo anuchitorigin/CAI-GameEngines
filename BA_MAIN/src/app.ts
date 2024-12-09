@@ -30,7 +30,7 @@ import assessment from './routes/assessment';
 
 //################################# DECLARATION #################################
 const app: Express = express();
-const appver: string = 'v1.0.20241204';
+const appver: string = 'v1.0.20241208';
 const port: number = 57100;
 // const port: number = 80;
 const corsOptions: cors.CorsOptions = {
@@ -64,7 +64,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 /* define the HOME route */
-app.get('/', async (req: Request, res: Response) => {
+app.get('/ping', async (req: Request, res: Response) => {
   res.send(`This is BA_MAIN API endpoint. (Build: ${appver})`);
 });
 
