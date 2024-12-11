@@ -9,6 +9,7 @@ services:
     depends_on:
       - ba_main
       - ba_auth
+      - ba_data
   ba_main:
     image: anuchitorigin/caige-ba_main:latest
     command: npm start

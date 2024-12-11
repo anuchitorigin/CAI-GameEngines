@@ -37,7 +37,7 @@ import exam from './routes/exam';
 
 //################################# DECLARATION #################################
 const app: Express = express();
-const appver: string = 'v1.0.20241203';
+const appver: string = 'v1.0.20241208';
 const port: number = 57102;
 // const port: number = 80;
 const corsOptions: cors.CorsOptions = {
@@ -71,7 +71,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 /* define the HOME route */
-app.get('/', async (req: Request, res: Response) => {
+app.get('/ping', async (req: Request, res: Response) => {
   res.send(`This is BA_DATA API endpoint. (Build: ${appver})`);
 });
 

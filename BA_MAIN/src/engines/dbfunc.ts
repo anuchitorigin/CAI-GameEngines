@@ -3,6 +3,7 @@
 // import crypto from 'crypto';
 
 //---- Application Modules ----
+import env from './env';
 import K from './constant';
 import dbconnect from './db_oper';
 import { xString, xNumber, isData, incident } from './originutil';
@@ -10,8 +11,8 @@ import { xString, xNumber, isData, incident } from './originutil';
 //################################# DECLARATION #################################
 const THIS_FILENAME = 'dbfunc.ts';
 
-const SCHEMA_DATA = 'caige_data';
-const SCHEMA_OPER = 'caige_oper';
+const SCHEMA_DATA = env.DATA_DATABASE;
+const SCHEMA_OPER = env.OPER_DATABASE;
 
 //################################# FUNCTION #################################
 async function add_assessment(
