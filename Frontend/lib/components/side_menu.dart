@@ -6,7 +6,6 @@ import 'package:flutter_content_placeholder/flutter_content_placeholder.dart';
 import 'package:http/http.dart' as http;
 import 'package:shimmer/shimmer.dart';
 
-import 'package:cai_gameengine/services/loading_dialog.service.dart';
 import 'package:cai_gameengine/services/domain.service.dart';
 
 import 'package:cai_gameengine/api/module.api.dart';
@@ -46,19 +45,12 @@ class _SideMenuState extends State<SideMenu> {
   void initState() {
     super.initState();
 
-    final LoadingDialogService loading = LoadingDialogService();
-
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      loading.presentLoading(context);
-
       loginSession = context.read<LoginSessionModel>();
 
       await getPretestInfo();
 
       await getBackendVersion();
-
-      // ignore: use_build_context_synchronously
-      context.pop();
     });
   }
 
@@ -103,7 +95,7 @@ class _SideMenuState extends State<SideMenu> {
   getBackendVersion() async {
     if(loginSession.token.isNotEmpty) {
       try {
-        http.Response res = await http.get(Uri.parse('$apiEndpoint/'), headers: { 'Authorization': 'Bearer ${loginSession.token}', 'responseType': 'text' });
+        http.Response res = await http.get(Uri.parse('$apiEndpoint/ping'), headers: { 'Authorization': 'Bearer ${loginSession.token}', 'responseType': 'text' });
       
         setState(() {
           backendVersion = res.body.substring(res.body.indexOf('v'), res.body.indexOf(')'));

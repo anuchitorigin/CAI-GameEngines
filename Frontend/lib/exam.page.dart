@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+// ignore: avoid_web_libraries_in_flutter
 import 'dart:html' as html;
 import 'dart:ui_web' as ui_web;
 
@@ -8,6 +9,8 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mime/mime.dart';
 import 'package:provider/provider.dart';
+import 'package:sizer/sizer.dart';
+// ignore: library_prefixes
 import 'package:flutter_quill/flutter_quill.dart' as Quill;
 
 import 'package:cai_gameengine/components/common/image_thumbnail.widget.dart';
@@ -38,7 +41,11 @@ class ExamPage extends StatefulWidget {
 
 class _ExamPageState extends State<ExamPage> {
   bool noModuleOrExam = false;
+
   bool isFinish = false;
+  int finishminute = 0;
+  int finishscore = 0;
+  int maxscore = 0;
 
   final Quill.QuillController _quizContentController = Quill.QuillController.basic();
 
@@ -46,7 +53,6 @@ class _ExamPageState extends State<ExamPage> {
 
   bool stopTimer = false;
   int examTime = 0;
-  // Timer? examTimer;
 
   List<CreateUpdateOne> quizChoiceList = [];
 
@@ -92,8 +98,6 @@ class _ExamPageState extends State<ExamPage> {
   @override
   void dispose() {
     super.dispose();
-
-    // examTimer?.cancel();
   }
 
   loadModule() async {
@@ -125,7 +129,6 @@ class _ExamPageState extends State<ExamPage> {
 
       try {
         APIResult resAssessment = await assessmentAPI.createOne(loginSession.token, null, module!.id, 0);
-
         if(resAssessment.status == 1) {
           setState(() {
             quizIndex = -1;
@@ -171,21 +174,14 @@ class _ExamPageState extends State<ExamPage> {
 
     if(resContent.status == 1) {
       if((resContent.result[0] as ContentModel).bucketdata.data.isNotEmpty) {
-        _quizContentController.document = Quill.Document.fromJson(jsonDecode(utf8.decode((resContent.result[0] as ContentModel).bucketdata.data)));
+        if(mounted) {
+          setState(() {
+            _quizContentController.document = Quill.Document.fromJson(jsonDecode(utf8.decode((resContent.result[0] as ContentModel).bucketdata.data)));
+          });
+        }
       }
     }
   }
-
-  // void timerCallback(timer) {
-  //   setState(() {
-  //     examTime--;
-  //   });
-
-  //   if(examTime <= 0) {
-  //     examTimer?.cancel();
-  //     showExpireDialog();
-  //   }
-  // }
   
   @override
   Widget build(BuildContext context) {
@@ -209,11 +205,11 @@ class _ExamPageState extends State<ExamPage> {
           child: Builder(
             builder: (BuildContext context) {
               if(noModuleOrExam) {
-                return const Column(
+                return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text('ไม่พบโมดูลหรือแบบทดสอบในระบบ', style: TextStyle(fontSize: 36),),
+                    Text('ไม่พบโมดูลหรือแบบทดสอบในระบบ', style: TextStyle(fontSize: 20.sp),),
                   ],
                 );
               } else if(isFinish) {
@@ -221,15 +217,17 @@ class _ExamPageState extends State<ExamPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Text('จบแบบทดสอบ', style: TextStyle(fontSize: 36),),
-                    Text(module!.title, style: const TextStyle(fontSize: 40),),
+                    Text('สรุปผล', style: TextStyle(fontSize: 18.sp),),
+                    Text(assessment!.title, style: TextStyle(fontSize: 20.sp),),
+                    Text('คะแนน $finishscore/$maxscore', style: TextStyle(fontSize: 17.sp, color: Colors.grey,),),
+                    Text('เวลา: $finishminute.00 นาที', style: TextStyle(fontSize: 17.sp, color: Colors.grey,),),
+                    const SizedBox(
+                      height: 30.0,
+                    ),
                     ElevatedButton(
                       onPressed: () {
                         final LoadingDialogService loading = LoadingDialogService();
                         loading.presentLoading(context);
-
-                        // examTimer?.cancel();
-                        // examTimer = null;
 
                         examTime = assessment!.examminute.toInt() * 60;
 
@@ -244,19 +242,23 @@ class _ExamPageState extends State<ExamPage> {
                           isFinish = false;
                           isLoading = false;
                           stopTimer = true;
+
+                          finishminute = 0;
+                          finishscore = 0;
+                          maxscore = 0;
                         });
 
                         context.pop();
                       },
                       style: ElevatedButton.styleFrom(
-                        maximumSize: const Size.fromWidth(175),
-                        padding: const EdgeInsets.all(15),
+                        maximumSize: Size.fromWidth(50.sp),
+                        padding: EdgeInsets.all(6.sp),
                         backgroundColor: Colors.black,
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('ทำแบบทดสอบอีกครั้ง', style: TextStyle(fontSize: 16, color: Colors.white,),),
+                          Text('ทำแบบทดสอบอีกครั้ง', style: TextStyle(fontSize: 15.sp, color: Colors.white,),),
                         ],
                       ),
                     ),
@@ -307,25 +309,25 @@ class _ExamPageState extends State<ExamPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Text(assessment!.title, style: const TextStyle(fontSize: 36),),
-              Text(assessment!.caption, style: const TextStyle(fontSize: 20),),
+              Text(assessment!.title, style: TextStyle(fontSize: 20.sp),),
+              Text(assessment!.caption, style: TextStyle(fontSize: 16.sp),),
               Expanded(
                 flex: 1,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0,),
+                  padding: EdgeInsets.symmetric(horizontal: 18.sp, vertical: 4.sp,),
                   child: Container(
                     width: double.maxFinite,
                     height: double.maxFinite,
-                    padding: const EdgeInsets.all(10.0),
+                    padding: EdgeInsets.all(8.sp),
                     decoration: BoxDecoration(
                       border: Border.all(
                         color: colorScheme.onSurface,
                         width: 2.0,
                       ),
-                      borderRadius: const BorderRadius.all(Radius.circular(10.0)),
+                      borderRadius: BorderRadius.all(Radius.circular(8.sp)),
                     ),
                     child: SingleChildScrollView(
-                      child: Text(assessment!.descr, style: const TextStyle(fontSize: 20),),
+                      child: Text(assessment!.descr, style: TextStyle(fontSize: 15.sp),),
                     )
                   ),
                 ),
@@ -344,9 +346,6 @@ class _ExamPageState extends State<ExamPage> {
               ElevatedButton(
                 onPressed: () async {
                   examTime = assessment!.examminute.toInt() * 60;
-                  // if(examTime > 0) {
-                  //   examTimer = Timer.periodic(const Duration(seconds: 1), timerCallback);
-                  // }
                   setState(() {
                     stopTimer = false;
                   });
@@ -356,15 +355,15 @@ class _ExamPageState extends State<ExamPage> {
                   });
                 },
                 style: ElevatedButton.styleFrom(
-                  maximumSize: const Size.fromWidth(180),
-                  padding: const EdgeInsets.all(15),
+                  maximumSize: Size.fromWidth(45.sp),
+                  padding: EdgeInsets.all(10.sp),
                   backgroundColor: colorScheme.primary,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('เริ่มทำแบบทดสอบ ', style: TextStyle(fontSize: 16, color: colorScheme.onPrimary,),),
-                    Icon(Icons.arrow_forward, color: colorScheme.onPrimary,),
+                    Text('เริ่มทำแบบทดสอบ ', style: TextStyle(fontSize: 14.sp, color: colorScheme.onPrimary,),),
+                    Icon(Icons.arrow_forward, size: 14.sp, color: colorScheme.onPrimary,),
                   ],
                 ),
               ),
@@ -380,17 +379,17 @@ class _ExamPageState extends State<ExamPage> {
     if(currentQuiz.mediaid.isNotEmpty) {
       mediaWidget = getMedia(currentQuiz.mediaid);
     } else {
-      mediaWidget = Future.value(ImageThumbnailWidget(image: Image.asset('assets/images/default_picture.png',)));
+      mediaWidget = Future.value(const SizedBox(width: 0.0, height: 0.0,));
     }
 
-    if(currentQuiz.contentid.isNotEmpty) {
+    if(currentQuiz.contentid.isNotEmpty && _quizContentController.document.isEmpty()) {
       getQuizContent(currentQuiz.contentid);
     }
 
     return Column(
       children: [
         const SizedBox(
-          height: 15,
+          height: 10.0,
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -401,10 +400,10 @@ class _ExamPageState extends State<ExamPage> {
             ),
             Expanded(
               flex: 7,
-              child: Text('แบบทดสอบ: ${assessment!.title}', style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold,),),
+              child: Text('แบบทดสอบ: ${assessment!.title}', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold,),),
             ),
             Expanded(
-              flex: 2,
+              flex: 3,
               child: Column(
                 children: [
                   ExamTimerWidget(
@@ -418,21 +417,6 @@ class _ExamPageState extends State<ExamPage> {
                       }
                     }
                   ),
-                  // Container(
-                  //   width: double.maxFinite,
-                  //   padding: const EdgeInsets.symmetric(vertical: 5.0),
-                  //   decoration: BoxDecoration(
-                  //     color: colorScheme.surfaceContainer,
-                  //     borderRadius: BorderRadius.circular(10.0),
-                  //   ),
-                  //   child: Column(
-                  //     children: [
-                  //       const Icon(Icons.access_time,),
-                  //       Text(examTimer != null ? '${(examTime / 60).floor().toString().padLeft(2, '0')}:${(examTime % 60).toString().padLeft(2, '0')}' : '--:--', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold,),),
-                  //       Text(examTimer != null ? 'เวลาคงเหลือ' : 'ไม่กำหนดเวลา', style: const TextStyle(fontSize: 12,),),
-                  //     ],
-                  //   ),
-                  // ),
                   const SizedBox(
                     height: 5.0,
                   ),
@@ -441,8 +425,6 @@ class _ExamPageState extends State<ExamPage> {
                     children: [
                       ElevatedButton(
                         onPressed: () async {
-                          // examTimer?.cancel();
-                          // examTimer = null;
                           setState(() {
                             stopTimer = true;
                           });
@@ -467,23 +449,20 @@ class _ExamPageState extends State<ExamPage> {
                               isFinish = true;
                             });
                           } else {
-                            // if(examTime > 0) {
-                            //   examTimer = Timer.periodic(const Duration(seconds: 1), timerCallback);
-                            // }
                             setState(() {
                               stopTimer = false;
                             });
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          maximumSize: const Size.fromWidth(175),
-                          padding: const EdgeInsets.all(15),
+                          maximumSize: Size.fromWidth(40.sp),
+                          padding: EdgeInsets.all(6.sp),
                           backgroundColor: Colors.black,
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('ส่งกระดาษคำตอบ', style: TextStyle(fontSize: 16, color: Colors.white,),),
+                            Text('ส่งกระดาษคำตอบ', style: TextStyle(fontSize: 13.sp, color: Colors.white,),),
                           ],
                         ),
                       )
@@ -499,14 +478,14 @@ class _ExamPageState extends State<ExamPage> {
           ]
         ),
         Expanded(
-          flex: 9,
+          flex: 8,
           child: Padding(
             padding: const EdgeInsets.all(10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Expanded(
-                  flex: 1,
+                  flex: globalConstraints.maxWidth > 768 ? 1 : 0,
                   child: Container(),
                 ),
                 Expanded(
@@ -518,7 +497,7 @@ class _ExamPageState extends State<ExamPage> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('${currentQuiz.quizno}. ${currentQuiz.question}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold,),),
+                          Text('${currentQuiz.quizno}. ${currentQuiz.question}', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold,),),
                           const SizedBox(
                             height: 10.0,
                           ),
@@ -526,7 +505,7 @@ class _ExamPageState extends State<ExamPage> {
                             shrinkWrap: true,
                             itemCount: currentQuiz.choices.length,
                             itemBuilder: (context, index) {
-                              Future<Widget> choiceMediaWidget = Future.value(Container());
+                              Future<Widget> choiceMediaWidget = Future.value(const SizedBox(width: 0.0, height: 0.0,));
                               if(currentQuiz.choices[index].mediaid.isNotEmpty) {
                                 choiceMediaWidget = getMedia(currentQuiz.choices[index].mediaid);
                               }
@@ -547,17 +526,17 @@ class _ExamPageState extends State<ExamPage> {
                                           });
                                         },
                                       ),
-                                      const SizedBox(
-                                        width: 10,
+                                      SizedBox(
+                                        width: 6.sp,
                                       ),
                                       FutureBuilder<Widget>(
                                         future: choiceMediaWidget,
                                         builder: (context, AsyncSnapshot coverSnapshot) {
                                           if(coverSnapshot.hasData) {
-                                            if(coverSnapshot.data!.toString() != 'Container') {
+                                            if(coverSnapshot.data!.toString() != 'SizedBox.shrink') {
                                               return Container(
-                                                width: 100,
-                                                height: 100,
+                                                width: 30.sp,
+                                                height: 30.sp,
                                                 decoration: BoxDecoration(
                                                   color: Colors.white,
                                                   borderRadius: BorderRadius.circular(10.0),
@@ -569,8 +548,8 @@ class _ExamPageState extends State<ExamPage> {
                                             }
                                           } else {
                                             return SizedBox(
-                                              width: 60,
-                                              height: 60,
+                                              width: 30.sp,
+                                              height: 30.sp,
                                               child: CircularProgressIndicator(
                                                 color: colorScheme.secondary,
                                               ),
@@ -582,19 +561,23 @@ class _ExamPageState extends State<ExamPage> {
                                         future: choiceMediaWidget,
                                         builder: (context, AsyncSnapshot coverSnapshot) {
                                           if(coverSnapshot.hasData) {
-                                            if(coverSnapshot.data!.toString() != 'Container') {
-                                              return const SizedBox(
-                                                width: 10,
+                                            if(coverSnapshot.data!.toString() != 'SizedBox.shrink') {
+                                              return SizedBox(
+                                                width: 6.sp,
                                               );
                                             } else {
-                                              return Container();
+                                              return const SizedBox(width: 0.0, height: 0.0,);
                                             }
                                           } else {
-                                            return Container();
+                                            return const SizedBox(width: 0.0, height: 0.0,);
                                           }
                                         }
                                       ),
-                                      Text(currentQuiz.choices[index].answer, style: TextStyle(fontSize: 16, color: colorScheme.onSurface,),),
+                                      Expanded(
+                                        child: SizedBox(
+                                          child: Text(currentQuiz.choices[index].answer, style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurface,),),
+                                        ),
+                                      ),
                                     ],
                                   ),
                                   const SizedBox(
@@ -609,60 +592,61 @@ class _ExamPageState extends State<ExamPage> {
                     ),
                   ),
                 ),
-                Expanded(
-                  flex: 5,
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    width: double.maxFinite,
-                    height: double.maxFinite,
-                    decoration: BoxDecoration(
-                      border: Border.all(width: 1, color: colorScheme.onSurface),
-                    ),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          FutureBuilder<Widget>(
-                            future: mediaWidget,
-                            builder: (context, AsyncSnapshot mediaSnapshot) {
-                              if(mediaSnapshot.hasData) {
-                                return LayoutBuilder(
-                                  builder: (context, constraints) {
-                                    return SizedBox(
-                                      width: constraints.maxWidth / 3,
-                                      child: mediaSnapshot.data!,
+                Visibility(
+                  visible: currentQuiz.mediaid.isNotEmpty || !_quizContentController.document.isEmpty(),
+                  child: Expanded(
+                    flex: 5,
+                    child: Container(
+                      padding: EdgeInsets.all(6.sp),
+                      width: double.maxFinite,
+                      height: double.maxFinite,
+                      decoration: BoxDecoration(
+                        border: Border.all(width: 1, color: colorScheme.onSurface),
+                      ),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            FutureBuilder<Widget>(
+                              future: mediaWidget,
+                              builder: (context, AsyncSnapshot mediaSnapshot) {
+                                if(mediaSnapshot.hasData) {
+                                  if(mediaSnapshot.data!.toString() != 'SizedBox.shrink') {
+                                    return LayoutBuilder(
+                                      builder: (context, constraints) {
+                                        return SizedBox(
+                                          width: constraints.maxWidth / 3,
+                                          child: mediaSnapshot.data!,
+                                        );
+                                      },
                                     );
-                                  },
-                                );
-                              } else {
-                                return SizedBox(
-                                  width: 60,
-                                  height: 60,
-                                  child: CircularProgressIndicator(
-                                    color: colorScheme.secondary,
-                                  ),
-                                );
+                                  } else {
+                                    return const SizedBox(width: 0.0, height: 0.0,);
+                                  }
+                                } else {
+                                  return const SizedBox(width: 0.0, height: 0.0,);
+                                }
                               }
-                            }
-                          ),
-                          FutureBuilder<Widget>(
-                            future: mediaWidget,
-                            builder: (context, AsyncSnapshot coverSnapshot) {
-                              if(coverSnapshot.hasData) {
-                                return const SizedBox(
-                                  height: 10,
-                                );
-                              } else {
-                                return Container();
+                            ),
+                            FutureBuilder<Widget>(
+                              future: mediaWidget,
+                              builder: (context, AsyncSnapshot mediaSnapshot) {
+                                if(mediaSnapshot.hasData) {
+                                  return SizedBox(
+                                    height: 6.sp,
+                                  );
+                                } else {
+                                  return Container();
+                                }
                               }
-                            }
-                          ),
-                          Quill.QuillEditor.basic(
-                            controller: _quizContentController,
-                            configurations: const Quill.QuillEditorConfigurations(),
-                          ),
-                        ],
+                            ),
+                            Quill.QuillEditor.basic(
+                              controller: _quizContentController,
+                              configurations: const Quill.QuillEditorConfigurations(),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -671,87 +655,147 @@ class _ExamPageState extends State<ExamPage> {
             ),
           )
         ),
-        const SizedBox(
-          height: 15,
-        ),
         Expanded(
           flex: 1,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Visibility(
-                visible: quizIndex > 0,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    final LoadingDialogService loading = LoadingDialogService();
-                    loading.presentLoading(context);
+              Expanded(
+                flex: 2,
+                child: Padding(
+                  padding: EdgeInsets.only(right: 20.sp),
+                  child: Visibility(
+                    visible: quizIndex > 0,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () async {
+                            final LoadingDialogService loading = LoadingDialogService();
+                            loading.presentLoading(context);
 
-                    quizIndex--;
+                            quizIndex--;
 
-                    final CreateUpdateOne checkCurrentChoice = quizChoiceList.firstWhere((e) => e.id == assessment!.quizzes[quizIndex].id);
-                    if(checkCurrentChoice.choice_id != 0) {
-                      choiceSelection = assessment!.quizzes[quizIndex].choices.firstWhere((e) => e.id == checkCurrentChoice.choice_id);
-                    } else {
-                      choiceSelection = null;
-                    }
+                            final CreateUpdateOne checkCurrentChoice = quizChoiceList.firstWhere((e) => e.id == assessment!.quizzes[quizIndex].id);
+                            if(checkCurrentChoice.choice_id != 0) {
+                              choiceSelection = assessment!.quizzes[quizIndex].choices.firstWhere((e) => e.id == checkCurrentChoice.choice_id);
+                            } else {
+                              choiceSelection = null;
+                            }
 
-                    // ignore: use_build_context_synchronously
-                    context.pop();
+                            // ignore: use_build_context_synchronously
+                            context.pop();
 
-                    setState(() {});
-                  },
-                  style: ElevatedButton.styleFrom(
-                    maximumSize: const Size.fromWidth(140),
-                    padding: const EdgeInsets.all(15),
-                    backgroundColor: colorScheme.secondary,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.arrow_back, color: colorScheme.onSecondary,),
-                      Text(' ถอยกลับ', style: TextStyle(fontSize: 16, color: colorScheme.onSecondary,),),
-                    ],
+                            setState(() {
+                              _quizContentController.document = Quill.Document();
+                            });
+                          },
+                          style: ElevatedButton.styleFrom(
+                            maximumSize: Size.fromWidth(35.sp),
+                            padding: EdgeInsets.all(8.sp),
+                            backgroundColor: colorScheme.secondary,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.arrow_back, size: 14.sp, color: colorScheme.onSecondary,),
+                              Text(' ถอยกลับ', style: TextStyle(fontSize: 14.sp, color: colorScheme.onSecondary,),),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-              Visibility(
-                visible: (quizIndex > 0) && (quizIndex < assessment!.quizzes.length - 1),
-                child: const SizedBox(
-                  width: 50.0,
+              Expanded(
+                flex: 1,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text('ไปที่ข้อสอบ', style: TextStyle(fontSize: 12.sp,),),
+                    DropdownButton(
+                      padding: EdgeInsets.symmetric(horizontal: 7.sp, vertical: 2.sp),
+                      onChanged: (value) async {
+                        if(value != null) {
+                          final LoadingDialogService loading = LoadingDialogService();
+                          loading.presentLoading(context);
+
+                          quizIndex = value;
+
+                          final CreateUpdateOne checkCurrentChoice = quizChoiceList.firstWhere((e) => e.id == assessment!.quizzes[quizIndex].id);
+                          if(checkCurrentChoice.choice_id != 0) {
+                            choiceSelection = assessment!.quizzes[quizIndex].choices.firstWhere((e) => e.id == checkCurrentChoice.choice_id);
+                          } else {
+                            choiceSelection = null;
+                          }
+
+                          // ignore: use_build_context_synchronously
+                          context.pop();
+
+                          setState(() {
+                            _quizContentController.document = Quill.Document();
+                          });
+                        }
+                      },
+                      value: quizIndex,
+                      items: assessment!.quizzes.asMap().map((i, element) {
+                        return MapEntry(i,
+                          DropdownMenuItem<int>(
+                            value: i,
+                            child: Text('ข้อ ${element.quizno}.', style: TextStyle(fontSize: 14.sp,),),
+                          ),
+                        );
+                      }).values.toList(),
+                    ),
+                  ],
                 ),
               ),
-              Visibility(
-                visible: quizIndex < assessment!.quizzes.length - 1,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    final LoadingDialogService loading = LoadingDialogService();
-                    loading.presentLoading(context);
+              Expanded(
+                flex: 2,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 20.sp),
+                  child: Visibility(
+                    visible: quizIndex < assessment!.quizzes.length - 1,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () async {
+                            final LoadingDialogService loading = LoadingDialogService();
+                            loading.presentLoading(context);
 
-                    quizIndex++;
+                            quizIndex++;
 
-                    final CreateUpdateOne checkCurrentChoice = quizChoiceList.firstWhere((e) => e.id == assessment!.quizzes[quizIndex].id);
-                    if(checkCurrentChoice.choice_id != 0) {
-                      choiceSelection = assessment!.quizzes[quizIndex].choices.firstWhere((e) => e.id == checkCurrentChoice.choice_id);
-                    } else {
-                      choiceSelection = null;
-                    }
+                            final CreateUpdateOne checkCurrentChoice = quizChoiceList.firstWhere((e) => e.id == assessment!.quizzes[quizIndex].id);
+                            if(checkCurrentChoice.choice_id != 0) {
+                              choiceSelection = assessment!.quizzes[quizIndex].choices.firstWhere((e) => e.id == checkCurrentChoice.choice_id);
+                            } else {
+                              choiceSelection = null;
+                            }
 
-                    // ignore: use_build_context_synchronously
-                    context.pop();
+                            // ignore: use_build_context_synchronously
+                            context.pop();
 
-                    setState(() {});
-                  },
-                  style: ElevatedButton.styleFrom(
-                    maximumSize: const Size.fromWidth(140),
-                    padding: const EdgeInsets.all(15),
-                    backgroundColor: colorScheme.primary,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('ถัดไป ', style: TextStyle(fontSize: 16, color: colorScheme.onPrimary,),),
-                      Icon(Icons.arrow_forward, color: colorScheme.onPrimary,),
-                    ],
+                            setState(() {
+                              _quizContentController.document = Quill.Document();
+                            });
+                          },
+                          style: ElevatedButton.styleFrom(
+                            maximumSize: Size.fromWidth(35.sp),
+                            padding: EdgeInsets.all(8.sp),
+                            backgroundColor: colorScheme.primary,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text('ถัดไป ', style: TextStyle(fontSize: 14.sp, color: colorScheme.onPrimary,),),
+                              Icon(Icons.arrow_forward, size: 14.sp, color: colorScheme.onPrimary,),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -768,26 +812,45 @@ class _ExamPageState extends State<ExamPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('ต้องการส่งกระดาษคำตอบหรือไม่', style: TextStyle(fontSize: 36, color: colorScheme.onSurface,),),
+          title: Text('ต้องการส่งกระดาษคำตอบหรือไม่', style: TextStyle(fontSize: 20.sp, color: colorScheme.onSurface,),),
           actions: [
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: colorScheme.primary,
-                padding: const EdgeInsets.fromLTRB(25, 15, 25, 15),
+                padding: EdgeInsets.symmetric(horizontal: 12.sp, vertical: 6.sp,),
               ),
               onPressed: () async {
+                final LoadingDialogService loading = LoadingDialogService();
+                // ignore: use_build_context_synchronously
+                loading.presentLoading(context);
+
                 final bool submitSuccess = await submitExam();
 
                 if(submitSuccess) {
+                  final AssessmentAPI assessmentAPI = AssessmentAPI();
+                  APIResult resExamResult = await assessmentAPI.readFilter(loginSession.token, 1, 1, "desc", null, null, null, null, loginSession.user!.userid, null, module!.id, 0);
+                  if(resExamResult.status == 1) {
+                    finishminute = (resExamResult.result[0] as AssessmentModel).finishminute;
+                    finishscore = (resExamResult.result[0] as AssessmentModel).finishscore;
+                    maxscore = assessment!.maxscore;
+                  }
+
                   // ignore: use_build_context_synchronously
                   context.pop(true);
+                  // ignore: use_build_context_synchronously
+                  context.pop(true);
+
+                  setState(() {
+                    isFinish = true;
+                    isLoading = false;
+                  });
                 }
               },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('ส่ง', style: TextStyle(fontSize: 20, color: colorScheme.onPrimary,),),
+                  Text('ส่ง', style: TextStyle(fontSize: 16.sp, color: colorScheme.onPrimary,),),
                 ],
               ),
             ),
@@ -797,7 +860,7 @@ class _ExamPageState extends State<ExamPage> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: colorScheme.secondary,
-                padding: const EdgeInsets.fromLTRB(25, 15, 25, 15),
+                padding: EdgeInsets.symmetric(horizontal: 12.sp, vertical: 6.sp,),
               ),
               onPressed: () async {
                 context.pop(false);
@@ -806,7 +869,7 @@ class _ExamPageState extends State<ExamPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('ยกเลิก', style: TextStyle(fontSize: 20, color: colorScheme.onSecondary,),),
+                  Text('ยกเลิก', style: TextStyle(fontSize: 16.sp, color: colorScheme.onSecondary,),),
                 ],
               ),
             ),
@@ -822,12 +885,12 @@ class _ExamPageState extends State<ExamPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('หมดเวลาทำแบบทดสอบ', style: TextStyle(fontSize: 36, color: colorScheme.onSurface,),),
+          title: Text('หมดเวลาทำแบบทดสอบ', style: TextStyle(fontSize: 20.sp, color: colorScheme.onSurface,),),
           actions: [
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: colorScheme.secondary,
-                padding: const EdgeInsets.fromLTRB(25, 15, 25, 15),
+                padding: EdgeInsets.symmetric(horizontal: 12.sp, vertical: 6.sp,),
               ),
               onPressed: () async {
                 final LoadingDialogService loading = LoadingDialogService();
@@ -836,10 +899,17 @@ class _ExamPageState extends State<ExamPage> {
 
                 final bool submitSuccess = await submitExam();
 
-                // ignore: use_build_context_synchronously
-                  context.pop();
-
                 if(submitSuccess) {
+                  final AssessmentAPI assessmentAPI = AssessmentAPI();
+                  APIResult resExamResult = await assessmentAPI.readFilter(loginSession.token, 1, 1, "desc", null, null, null, null, loginSession.user!.userid, null, module!.id, 0);
+                  if(resExamResult.status == 1) {
+                    finishminute = (resExamResult.result[0] as AssessmentModel).finishminute;
+                    finishscore = (resExamResult.result[0] as AssessmentModel).finishscore;
+                    maxscore = assessment!.maxscore;
+                  }
+
+                  // ignore: use_build_context_synchronously
+                  context.pop();
                   // ignore: use_build_context_synchronously
                   context.pop();
 
@@ -853,7 +923,7 @@ class _ExamPageState extends State<ExamPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('ตกลง', style: TextStyle(fontSize: 20, color: colorScheme.onSecondary,),),
+                  Text('ตกลง', style: TextStyle(fontSize: 16.sp, color: colorScheme.onSecondary,),),
                 ],
               ),
             ),
@@ -888,13 +958,8 @@ class _ExamPageState extends State<ExamPage> {
     }
 
     final AssessmentAPI assessmentAPI = AssessmentAPI();
-    APIResult resUpdate = await assessmentAPI.updateOne(loginSession.token, assessment!.assessment_id, assessment!.examid, assessment!.examminute > 0 ? (((assessment!.examminute * 60) - examTime) / 60).ceil() : 1, quizChoiceList);
+    APIResult resUpdate = await assessmentAPI.updateOne(loginSession.token, assessment!.assessment_id, assessment!.examid, assessment!.examminute > 0 && (((assessment!.examminute * 60) - examTime) / 60).ceil() > 0 ? (((assessment!.examminute * 60) - examTime) / 60).ceil() : 1, quizChoiceList);
     if(resUpdate.status == 1) {
-      // // examTimer?.cancel();
-      // // examTimer = null;
-      // setState(() {
-      //   stopTimer = true;
-      // });
       examTime = 0;
 
       choiceSelection = null;
@@ -937,10 +1002,10 @@ class _ExamPageState extends State<ExamPage> {
       } else if(mimeType.contains('application/vnd.ms-powerpoint') || mimeType.contains('application/vnd.openxmlformats-officedocument.presentationml.presentation')) {
         return buildMSPowerpointLink(bucketid, mimeType);
       } else {
-        return ImageThumbnailWidget(image: Image.asset('assets/images/default_picture.png',));
+        return const SizedBox(width: 0.0, height: 0.0,);
       }
     } else {
-      return ImageThumbnailWidget(image: Image.asset('assets/images/default_picture.png',));
+      return const SizedBox(width: 0.0, height: 0.0,);
     }
   }
 

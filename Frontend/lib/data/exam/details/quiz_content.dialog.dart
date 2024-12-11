@@ -159,14 +159,7 @@ class _QuizContentDialogState extends State<QuizContentDialog> {
                                 padding: const EdgeInsets.fromLTRB(25, 15, 25, 15),
                               ),
                               onPressed: () {
-                                if(_controller.document.length > 1) {
-                                  contentSubmit();
-                                } else {
-                                  final FailureDialog failureDialog = FailureDialog();
-
-                                  // ignore: use_build_context_synchronously
-                                  failureDialog.showFailure(context, colorScheme, 'กรุณาเขียนเนื้อหา');
-                                }
+                                contentSubmit();
                               },
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,

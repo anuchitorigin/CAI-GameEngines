@@ -14,9 +14,9 @@ import 'package:cai_gameengine/services/theme_manager.service.dart';
 
 import 'package:cai_gameengine/login.page.dart';
 import 'package:cai_gameengine/signup.page.dart';
-import 'package:cai_gameengine/lesson.page.dart';
 import 'package:cai_gameengine/data/module/details/module_details.page.dart';
 import 'package:cai_gameengine/data/exam/details/exam_details.page.dart';
+import 'package:sizer/sizer.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -119,9 +119,17 @@ class CAIGameEngineApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ThemeNotifier>(
       builder: (context, theme, _) {
-        return MaterialApp.router(
-          theme: theme.getTheme(),
-          routerConfig: _route,
+        // return MaterialApp.router(
+        //   theme: theme.getTheme(),
+        //   routerConfig: _route,
+        // );
+        return Sizer( 
+          builder: (context, orientation, screenType) {
+            return MaterialApp.router(
+              theme: theme.getTheme(),
+              routerConfig: _route,
+            );
+          },
         );
       }
     );

@@ -22,7 +22,7 @@ final List<MenuItem> menuList = [
   MenuItem( text: 'เกี่ยวกับ', icon: Icons.contact_support_rounded, path: '/about', permission: 'about',),
   MenuItem( checkLock: true, text: 'เนื้อหา', icon: Icons.menu_book, path: '/lesson', permission: 'lesson',),
   MenuItem( text: 'แบบทดสอบ', icon: Icons.question_answer_outlined, path: '/exam', permission: 'exam',),
-  // MenuItem( checkLock: true, text: 'คะแนน', icon: Icons.school_rounded, path: '/score', permission: 'score',),
+  MenuItem( checkLock: true, text: 'คะแนน', icon: Icons.school_rounded, path: '/score', permission: 'score',),
   MenuItem( text: 'ฐานข้อมูล', icon: Icons.schema_outlined, permission: 'data', submenu: [
     MenuItem( text: 'เนื้อหา', icon: Icons.view_module, path: '/dat-module', permission: 'dat-module', ),
     MenuItem( text: 'แบบทดสอบ', icon: Icons.quiz, path: '/dat-exam', permission: 'dat-exam', ),

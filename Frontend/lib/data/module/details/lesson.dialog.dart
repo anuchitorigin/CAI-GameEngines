@@ -22,7 +22,6 @@ import 'package:cai_gameengine/services/failure_dialog.service.dart';
 
 import 'package:cai_gameengine/models/api_result.model.dart';
 import 'package:cai_gameengine/models/login_session.model.dart';
-import 'package:cai_gameengine/models/module.model.dart';
 import 'package:cai_gameengine/models/lesson.model.dart';
 import 'package:cai_gameengine/models/create_bucket.model.dart';
 import 'package:cai_gameengine/models/create_content.model.dart';

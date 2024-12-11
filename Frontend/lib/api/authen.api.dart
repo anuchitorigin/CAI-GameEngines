@@ -139,7 +139,11 @@ String getHash(String text) {
 }
 
 Future<String> getIpAddress() async {
-  var res = await http.get(Uri.parse('https://api.ipify.org/?format=json'));
+  try {
+    var res = await http.get(Uri.parse('https://api.ipify.org/?format=json'));
   
-  return json.decode(res.body)['ip'];
+    return json.decode(res.body)['ip'];
+  } catch(err) {
+    return '0.0.0.0';
+  }
 }

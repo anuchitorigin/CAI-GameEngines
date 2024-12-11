@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:sizer/sizer.dart';
 
 import 'package:cai_gameengine/services/loading_dialog.service.dart';
 import 'package:cai_gameengine/services/theme_manager.service.dart';
@@ -22,7 +23,7 @@ class TopBar extends StatelessWidget {
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     ColorScheme colorScheme = Theme.of(context).colorScheme;
 
-    bool isMd = constraints.maxWidth > 768;
+    bool isMd = constraints.maxWidth > 1280;
 
     return Container(
       height: 60,
@@ -40,7 +41,7 @@ class TopBar extends StatelessWidget {
                   scaffoldKey.currentState!.openDrawer();
                 }
               },
-              iconSize: 30,
+              iconSize: 20.sp,
               icon: Icon(Icons.menu, color: colorScheme.onPrimary,),
             ),
           ),
@@ -50,7 +51,7 @@ class TopBar extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(15, 5, 15, 5),
-            child: Text(title, style: TextStyle(color: colorScheme.onPrimary, fontSize: 24, fontWeight: FontWeight.bold)),
+            child: Text(title, style: TextStyle(color: colorScheme.onPrimary, fontSize: 15.sp, fontWeight: FontWeight.bold)),
           ),
           // Material(
           //   color: colorScheme.primary,
@@ -71,7 +72,7 @@ class TopBar extends StatelessWidget {
                 return ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colorScheme.inversePrimary,
-                    padding: const EdgeInsets.all(20),
+                    padding: EdgeInsets.all(11.sp),
                   ),
                   onPressed: () {
                     if (controller.isOpen) {
@@ -83,12 +84,12 @@ class TopBar extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.person, color: colorScheme.onPrimaryContainer,),
+                      Icon(Icons.person, size: 15.sp, color: colorScheme.onPrimaryContainer,),
                       FutureBuilder<ProfileModel>(
                         future: Future.delayed(const Duration(milliseconds: 1), () => Future.value(loginSession.user)),
                         builder: (BuildContext context, AsyncSnapshot<ProfileModel> user) {
                           if(user.hasData && user.data != null) {
-                            return Text(' ${user.data!.firstname} ${user.data!.lastname}', style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.onPrimaryContainer),);
+                            return Text(' ${user.data!.firstname} ${user.data!.lastname}', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: colorScheme.onPrimaryContainer),);
                           } else {
                             return SizedBox(
                               width: 100,
@@ -110,7 +111,7 @@ class TopBar extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     shape: const CircleBorder(),
                     backgroundColor: colorScheme.inversePrimary,
-                    padding: const EdgeInsets.all(20),
+                    padding: EdgeInsets.all(11.sp),
                   ),
                   onPressed: () {
                     if (controller.isOpen) {
@@ -119,7 +120,7 @@ class TopBar extends StatelessWidget {
                       controller.open();
                     }
                   },
-                  child: Icon(Icons.person, color: colorScheme.onPrimaryContainer,),
+                  child: Icon(Icons.person, size: 15.sp, color: colorScheme.onPrimaryContainer,),
                 );
               }
             },
@@ -166,9 +167,9 @@ class TopBar extends StatelessWidget {
                 },
                 style: ElevatedButton.styleFrom(
                   shape: const CircleBorder(),
-                  padding: const EdgeInsets.all(20),
+                  padding: EdgeInsets.all(11.sp),
                 ),
-                child: isDarkMode ? const Icon(Icons.light_mode, color: Color(0xFFFFFFFF),) : const Icon(Icons.dark_mode, color: Color(0xFF000000),),
+                child: isDarkMode ? Icon(Icons.light_mode, size: 15.sp, color: const Color(0xFFFFFFFF),) : Icon(Icons.dark_mode, size: 15.sp, color: const Color(0xFF000000),),
               );
             }
           ),

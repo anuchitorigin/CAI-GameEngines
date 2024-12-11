@@ -47,7 +47,7 @@ class _MainLayoutState extends State<MainLayout> {
         return SelectionArea(
           child: LayoutBuilder(
             builder: (context, BoxConstraints constraints) {
-              bool isMd = constraints.maxWidth > 768;
+              bool isMd = constraints.maxWidth > 1280;
 
               if(isMd) {
                 try {
