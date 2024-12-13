@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sizer/sizer.dart';
+
+import 'package:cai_gameengine/services/success_snackbar.service.dart';
 
 import 'package:cai_gameengine/models/login_session.model.dart';
 
@@ -21,6 +25,8 @@ class _SignupPageState extends State<SignupPage> {
   TextEditingController usernameController = TextEditingController();
   TextEditingController firstnameController = TextEditingController();
   TextEditingController lastnameController = TextEditingController();
+
+  late BoxConstraints globalConstraints;
 
   late bool isFormValid;
 
@@ -72,10 +78,10 @@ class _SignupPageState extends State<SignupPage> {
   }
 
   createContent() {
-    // AppLocalizations translate = AppLocalizations.of(context);
+    return LayoutBuilder(
+      builder: (context, BoxConstraints constraints) {
+        globalConstraints = constraints;
 
-    return Builder(
-      builder: (context) {
         return Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 520),
@@ -279,7 +285,37 @@ class _SignupPageState extends State<SignupPage> {
           ],
         ),
         content: SelectionArea(
-          child: Text('รหัสประจำตัวนิสิต: $name\nรหัสผ่าน: $password', style: const TextStyle(fontSize: 22,),),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('รหัสประจำตัวนิสิต: $name', style: const TextStyle(fontSize: 22,),),
+              Row(
+                children: [
+                  Text('รหัสผ่าน: $password', style: const TextStyle(fontSize: 22,),),
+                  const SizedBox(
+                    width: 5.0,
+                  ),
+                  IconButton(
+                    style: IconButton.styleFrom(
+                      fixedSize: Size(18.sp, 18.sp),
+                      side: BorderSide(color: colorScheme.onSecondary),
+                      backgroundColor: colorScheme.secondary
+                    ),
+                    onPressed: () async {
+                      await Clipboard.setData(ClipboardData(text: password));
+
+                      SuccessSnackBar snackbar = SuccessSnackBar();
+
+                      // ignore: use_build_context_synchronously
+                      ScaffoldMessenger.of(context).showSnackBar(snackbar.showSuccess('คัดลอกรหัสผ่านใส่คลิปบอร์ดแล้ว', globalConstraints, colorScheme));
+                    },
+                    icon: Icon(Icons.copy, size: 14.sp, color: colorScheme.onSecondary,),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
         actions: <Widget>[
           ElevatedButton(

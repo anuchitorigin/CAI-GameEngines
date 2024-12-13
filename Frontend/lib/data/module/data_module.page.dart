@@ -791,8 +791,6 @@ class _DataModulePageState extends State<DataModulePage> {
   List<Widget> buildModuleList(List<ModuleModel> moduleList, double cardWidth) {
     List<Widget> moduleWidgetList = [];
 
-    final TextStyle nameStyle = TextStyle(color: colorScheme.onSecondaryContainer, fontSize: 17);
-
     final Duration timezoneOffset = DateTime.now().timeZoneOffset;
 
     for(final module in moduleList) {

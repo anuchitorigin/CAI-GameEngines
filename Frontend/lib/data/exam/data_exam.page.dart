@@ -996,8 +996,6 @@ class _DataExamPageState extends State<DataExamPage> {
   List<Widget> buildExamList(List<ExamModel> examList, double cardWidth) {
     List<Widget> examWidgetList = [];
 
-    final TextStyle nameStyle = TextStyle(color: colorScheme.onSecondaryContainer, fontSize: 17);
-
     final Duration timezoneOffset = DateTime.now().timeZoneOffset;
 
     for(final exam in examList) {

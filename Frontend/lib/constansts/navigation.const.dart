@@ -3,6 +3,7 @@ import 'package:cai_gameengine/profile.page.dart';
 import 'package:cai_gameengine/about.page.dart';
 import 'package:cai_gameengine/lesson.page.dart';
 import 'package:cai_gameengine/exam.page.dart';
+import 'package:cai_gameengine/score.page.dart';
 
 import 'package:cai_gameengine/data/module/data_module.page.dart';
 import 'package:cai_gameengine/data/exam/data_exam.page.dart';
@@ -16,6 +17,7 @@ final navigationList = [
 
   ( path: '/lesson', widget: const LessonPage() ),
   ( path: '/exam', widget: const ExamPage() ),
+  ( path: '/score', widget: const ScorePage() ),
 
   //Data
   ( path: '/dat-module', widget: const DataModulePage() ),

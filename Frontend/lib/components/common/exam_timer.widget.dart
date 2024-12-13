@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:pausable_timer/pausable_timer.dart';
+import 'package:sizer/sizer.dart';
 
 class ExamTimerWidget extends StatefulWidget {
   const ExamTimerWidget({super.key, required this.isStop, required this.remainingSeconds, required this.onCount});
@@ -74,16 +75,16 @@ class _ExamTimerWidgetState extends State<ExamTimerWidget> {
 
     return Container(
       width: double.maxFinite,
-      padding: const EdgeInsets.symmetric(vertical: 5.0),
+      padding: EdgeInsets.symmetric(vertical: 2.sp),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(10.0),
+        borderRadius: BorderRadius.circular(8.sp),
       ),
       child: Column(
         children: [
-          const Icon(Icons.access_time,),
-          Text(examTimer != null ? '${(examTime / 60).floor().toString().padLeft(2, '0')}:${(examTime % 60).toString().padLeft(2, '0')}' : '--:--', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold,),),
-          Text(examTimer != null ? 'เวลาคงเหลือ' : 'ไม่กำหนดเวลา', style: const TextStyle(fontSize: 12,),),
+          Icon(Icons.access_time, size: 16.sp,),
+          Text(examTimer != null ? '${(examTime / 60).floor().toString().padLeft(2, '0')}:${(examTime % 60).toString().padLeft(2, '0')}' : '--:--', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold,),),
+          Text(examTimer != null ? 'เวลาคงเหลือ' : 'ไม่กำหนดเวลา', style: TextStyle(fontSize: 11.sp,),),
         ],
       ),
     );

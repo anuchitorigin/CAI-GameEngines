@@ -384,13 +384,9 @@ class _QuizChoiceDialogState extends State<QuizChoiceDialog> {
                               ],
                             ),
                           ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(choice.answer, style: nameStyle,),
-                            ],
-                          ),
+                          Expanded(
+                            child: Text(choice.answer, style: nameStyle,),
+                          )
                         ],
                       ),
                       Divider(

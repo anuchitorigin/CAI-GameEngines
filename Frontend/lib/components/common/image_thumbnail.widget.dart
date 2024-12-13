@@ -9,8 +9,6 @@ class ImageThumbnailWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Material(
       borderRadius: BorderRadius.circular(10.0),
       child: InkWell(
